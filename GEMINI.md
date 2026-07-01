@@ -1,6 +1,6 @@
 # LoopAI CRM — AI Agent Handoff Guide (GEMINI.md)
 
-Welcome! This document provides context on the codebase, tech stack, and instructions for future AI models/agents to continue development from **Chunk 3** onwards.
+Welcome! This document provides context on the codebase, tech stack, and instructions for future AI models/agents to continue development from **Chunk 5** onwards.
 
 ---
 
@@ -35,32 +35,40 @@ d:\loop-ai-crm/
 │   │   │   └── chat/
 │   │   │       └── route.ts # AI assistant route handler
 │   │   └── dashboard/
-│   │       ├── layout.tsx  # Shared shell layout (handles conditional widgets and viewports)
+│   │       ├── layout.tsx  # Shared shell layout (handles responsive and conditional viewports)
 │   │       ├── page.tsx    # Redirects /dashboard -> /dashboard/overview
 │   │       ├── overview/
 │   │       │   └── page.tsx # Overview Dashboard (Stat cards, inline widgets, Recent Clients)
 │   │       ├── clients/
 │   │       │   └── page.tsx # Client Directory (search, filter pills, grid)
 │   │       ├── projects/
-│   │       │   └── page.tsx # Projects "Coming soon" placeholder
+│   │       │   └── page.tsx # Projects page (3-column layout grid, search/filter pills)
 │   │       ├── inbox/
-│   │       │   └── page.tsx # Inbox "Coming soon" placeholder
+│   │       │   └── page.tsx # Inbox page (Full-width edge-to-edge split-pane messaging UI)
 │   │       └── analytics/
 │   │           └── page.tsx # Analytics "Coming soon" placeholder
 │   ├── components/
 │   │   ├── clients/
 │   │   │   └── client-card.tsx # Client profile cards (Framer Motion hovers)
+│   │   ├── projects/
+│   │   │   └── project-card.tsx # Project info card (uses extracted ProgressBar)
 │   │   ├── dashboard/
 │   │   │   └── top-nav.tsx     # Fully responsive navigation bar (hamburger menu on mobile)
+│   │   ├── ui/
+│   │   │   └── progress-bar.tsx # Reusable ProgressBar UI component
 │   │   └── widgets/
 │   │       ├── agreements-overview.tsx # Agreements progress bar (dynamic metrics)
 │   │       ├── clients-source.tsx      # Proportional platform segmented bar (dynamic metrics)
+│   │       ├── project-status-overview.tsx # Proportional projects status segmented bar
+│   │       ├── unread-summary.tsx      # Inbox unread messages summary sidebar card
 │   │       └── ai-assistant.tsx        # Interactive chat UI
 │   └── lib/
 │       ├── ai/
 │       │   └── chat.ts                 # OpenRouter API client with dynamic system context
 │       └── mock-data/
 │           ├── clients.ts              # Typed client data loaders (extended with agreements and project stats)
+│           ├── projects.ts             # Typed project data loaders (linked referentially to clients)
+│           ├── messages.ts             # Typed messaging threads database loader
 │           └── overview.ts             # Mock data aggregator for overview metrics
 ```
 
@@ -81,6 +89,19 @@ d:\loop-ai-crm/
 3. **Full-Browser Layout & Shell Flexibility**: Refactored the dashboard shell to span edge-to-edge in the browser, showing global gradient background glows. Configured sidebar widgets to only render the AI Assistant on non-clients pages.
 4. **Dynamic Data Aggregations**: Removed all hardcoded metrics by writing a calculator module `overview.ts` to compute metrics dynamically from `clients.ts` (keeping metrics consistent across pages).
 5. **Layout Shift & Animation Fixes**: Prevented layout jumps on navigation by reserving scrollbar space (`scrollbar-gutter: stable`) and tab sizes (transparent borders). Replaced CSS Grid layout transitions with `layout="position"` to fix filtering lag.
+
+### Chunk 3
+1. **Projects Directory Page (`/dashboard/projects`)**: Fully functional projects filter page with query search and status pills (All / Active / Completed / On Hold).
+2. **Project Cards Grid**: Rendered in a spacious 3-column layout on desktop to prevent cramping, styled with custom badges, deadlines, budgets, and client info (avatar, name, company).
+3. **ProgressBar UI Extraction**: Built a reusable, customizable `ProgressBar` UI component, integrated directly into the project cards.
+4. **Project Status Sidebar Widget**: Built a segmented proportional bar displaying Active, Completed, and On Hold project counts, generating dynamic follow-up guidelines when projects are on hold.
+
+### Chunk 4
+1. **Inbox Messaging Hub (`/dashboard/inbox`)**: A responsive two-pane messaging dashboard (conversations list on left, chat feed on right).
+2. **Full-Width Edge-to-Edge Chat layout**: Conditionally collapsed the widgets sidebar and main padding (`p-0`) on the Inbox route to dock the messaging pane flush against the navigation bar, maximizing viewport usage.
+3. **Normalized Messages Data Model**: Designed messages data normalized at the message-level with `read: boolean` flags and seeded 6 back-and-forth threads interlinked with existing client profiles.
+4. **Mobile Responsive Viewports**: Toggles showing only the thread list or only the chat window (equipped with a `< Back` button in the header) on mobile viewports.
+5. **Unread Badge & Dynamic Marking**: Selecting threads immediately marks their client messages as read, clearing unread indicator dots and updating unread state feeds in real-time.
 
 ---
 
@@ -113,9 +134,10 @@ d:\loop-ai-crm/
 
 ---
 
-## 5. Next Development Step (Chunk 3)
+## 5. Next Development Step (Chunk 5)
 
 Refer to **[TODO.md](file:///d:/loop-ai-crm/TODO.md)** for details on the upcoming modules:
+- Build out the Analytics Dashboard (`/dashboard/analytics`) using dynamic project/agreement charts.
+- Implement the "Suggest Reply" AI assistant integration in the Inbox.
 - Create client detail profiles under `/dashboard/clients/[id]`.
-- Implement server-side CRUD workflows and bind the application to a persistent database (Supabase/PostgreSQL).
-- Build out the rest of the dashboards (Projects, Inbox, Analytics).
+- Bind persistent database configurations (Supabase/PostgreSQL) and server CRUD actions.

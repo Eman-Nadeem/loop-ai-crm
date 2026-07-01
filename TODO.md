@@ -18,24 +18,31 @@ This file tracks the implemented features and flags out-of-scope work serving as
 - **Placeholder Dashboards**: Scaffolding for Projects, Inbox, and Analytics.
 - **Performance Optimizations**: Smoothed grid filtering animations to eliminate Framer Motion lag.
 
-### Chunk 3: Projects Page & Shared UI UI Extras (Current)
+### Chunk 3: Projects Page & Shared UI UI Extras
 - **Projects Directory Page (`/dashboard/projects`)**: Responsive grid displaying projects, search query filters, and status pills (All, Active, Completed, On Hold).
 - **Referential Projects Database (`src/lib/mock-data/projects.ts`)**: Interlocked project records connected to existing client avatars, names, and organizations.
 - **Project Card UI Component (`src/components/projects/project-card.tsx`)**: Reusable project cards displaying names, progress values, budgets, deadlines, and status badges.
 - **Reusable Progress Bar (`src/components/ui/progress-bar.tsx`)**: Extracted component for multi-view progress representation.
 - **Project Status Overview Widget (`src/components/widgets/project-status-overview.tsx`)**: Dynamic segmented ratios bar displaying status aggregates and context-aware client follow-up suggestions in the sidebar.
 
+### Chunk 4: Inbox Hub & Unified Messaging (Current)
+- **Inbox Messaging Hub (`/dashboard/inbox`)**: Responsive split-pane email/chat layout featuring a searchable left thread list and scroll-to-bottom right message feed (sent vs. received colored bubbles).
+- **Mock Messages Database (`src/lib/mock-data/messages.ts`)**: Seeded conversation histories interlinked with client profiles, tracking read/unread flags per message.
+- **Unread Status Sidebar Widget (`src/components/widgets/unread-summary.tsx`)**: Displays pending unread client messages count, and snippets in the sidebar.
+- **Dynamic State Actions**: Toggling active threads automatically updates read states. Local message inputs push new messages straight to the active feed in real-time.
+- **Responsive Viewport Toggles**: Implemented mobile active state switching with header back buttons to prevent column squishing.
+
 ---
 
 ## Out of Scope / Upcoming Chunks
 
 ### 1. Dashboard Pages Detail
-- **Inbox Page (`/dashboard/inbox`)**
-  - Integrated customer communications hub aggregating Upwork messages, Freelancer messages, and Fiverr inbox.
 - **Analytics Page (`/dashboard/analytics`)**
   - Deep-dive charts tracking monthly revenue growth, client acquisition cost, and average contract lifecycle.
 - **Projects Interactive Expansion**
   - Interactive Kanban board toggle, Gantt chart timelines, and repository linkages.
+- **AI Suggest-Reply Expansion (Chunk 5)**
+  - Integrate a "Suggest Reply" hook in the Inbox chat pane that pulls current message history as system context to draft responses.
 
 ### 2. Client Interactions & Details
 - **Client Detail View**
