@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  --background: #f3f4fa;
+  --foreground: #1f2029;
+}
+
+body {
+  background-color: #e5e8f4;
+  /* Beautiful radial gradient and background patterns matching the reference image's purple hue */
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(224, 218, 254, 0.4) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(200, 214, 252, 0.4) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(243, 232, 255, 0.5) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Custom stripe patterns for the agreements overview negotiations segment */
+.stripe-pattern {
+  background-image: repeating-linear-gradient(
+    45deg,
+    #f3f4f6,
+    #f3f4f6 10px,
+    #e5e7eb 10px,
+    #e5e7eb 20px
+  );
+}
+
+/* Premium scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
