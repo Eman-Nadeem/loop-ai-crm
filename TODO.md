@@ -11,24 +11,31 @@ This file tracks the implemented features and flags out-of-scope work serving as
 - **Clients Source Widget**: Platform proportional segmentation bar and tips.
 - **AI Relationship Assistant**: Clerk-protected sidebar chat UI connected to OpenRouter.
 
-### Chunk 2: Dashboard Overview & Real Navigation (Current)
+### Chunk 2: Dashboard Overview & Real Navigation
 - **Dashboard Overview Landing Page (`/dashboard/overview`)**: High-level financial reporting (Total Clients, Active Projects, Revenue Budget, Signed Agreements), inline widgets integration, and Recent Clients listing.
 - **Real Navigation Wiring**: Real App Router routes and active route state highlighting on the TopNav bar.
 - **Dynamic Data Aggregation (`src/lib/mock-data/overview.ts`)**: Dynamically computes stats from the mock database, maintaining synchronization between pages.
 - **Placeholder Dashboards**: Scaffolding for Projects, Inbox, and Analytics.
 - **Performance Optimizations**: Smoothed grid filtering animations to eliminate Framer Motion lag.
 
+### Chunk 3: Projects Page & Shared UI UI Extras (Current)
+- **Projects Directory Page (`/dashboard/projects`)**: Responsive grid displaying projects, search query filters, and status pills (All, Active, Completed, On Hold).
+- **Referential Projects Database (`src/lib/mock-data/projects.ts`)**: Interlocked project records connected to existing client avatars, names, and organizations.
+- **Project Card UI Component (`src/components/projects/project-card.tsx`)**: Reusable project cards displaying names, progress values, budgets, deadlines, and status badges.
+- **Reusable Progress Bar (`src/components/ui/progress-bar.tsx`)**: Extracted component for multi-view progress representation.
+- **Project Status Overview Widget (`src/components/widgets/project-status-overview.tsx`)**: Dynamic segmented ratios bar displaying status aggregates and context-aware client follow-up suggestions in the sidebar.
+
 ---
 
 ## Out of Scope / Upcoming Chunks
 
 ### 1. Dashboard Pages Detail
-- **Projects Page (`/dashboard/projects`)**
-  - Deliverable timelines, interactive Kanban board/Gantt chart, and repository linkages.
 - **Inbox Page (`/dashboard/inbox`)**
   - Integrated customer communications hub aggregating Upwork messages, Freelancer messages, and Fiverr inbox.
 - **Analytics Page (`/dashboard/analytics`)**
   - Deep-dive charts tracking monthly revenue growth, client acquisition cost, and average contract lifecycle.
+- **Projects Interactive Expansion**
+  - Interactive Kanban board toggle, Gantt chart timelines, and repository linkages.
 
 ### 2. Client Interactions & Details
 - **Client Detail View**

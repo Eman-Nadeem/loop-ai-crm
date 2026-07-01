@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import TopNav from "@/components/dashboard/top-nav";
 import AgreementsOverview from "@/components/widgets/agreements-overview";
 import ClientsSource from "@/components/widgets/clients-source";
+import ProjectStatusOverview from "@/components/widgets/project-status-overview";
 import AIAssistant from "@/components/widgets/ai-assistant";
 
 export default function DashboardLayout({
@@ -14,6 +15,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const isClientsPage = pathname === "/dashboard/clients";
+  const isProjectsPage = pathname === "/dashboard/projects";
 
   return (
     <div className="min-h-screen flex flex-col bg-transparent">
@@ -34,6 +36,9 @@ export default function DashboardLayout({
               <AgreementsOverview />
               <ClientsSource />
             </>
+          )}
+          {isProjectsPage && (
+            <ProjectStatusOverview />
           )}
           <AIAssistant />
         </aside>
