@@ -12,6 +12,7 @@ export default function InboxPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [newMsgText, setNewMsgText] = useState("");
   const [mobileActive, setMobileActive] = useState(false); // Controls mobile pane toggle
+  const [isGeneratingReply, setIsGeneratingReply] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -44,8 +45,33 @@ export default function InboxPage() {
   };
 
 
-  const handleSuggestAIDraft = () => {
-    alert("AI draft suggestion is scheduled for Chunk 5! When clicked, it will inspect this thread's context and output a suggested reply draft.");
+  const handleSuggestAIDraft = async () => {
+    if (!activeThread || !activeThread.client || isGeneratingReply) return;
+
+    setIsGeneratingReply(true);
+    try {
+      const response = await fetch("/api/chat/suggest-reply", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client: activeThread.client,
+          messages: activeThread.messages,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate suggestion");
+      }
+
+      const data = await response.json();
+      setNewMsgText(data.draft || "");
+    } catch (error) {
+      console.error("[Suggest Reply Error]:", error);
+    } finally {
+      setIsGeneratingReply(false);
+    }
   };
 
   // Filter threads by search query
@@ -188,10 +214,15 @@ export default function InboxPage() {
                 {/* AI Draft Suggest Button */}
                 <button
                   onClick={handleSuggestAIDraft}
-                  className="flex items-center gap-1.5 px-3 py-1.5 border border-indigo-100 hover:border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-bold shadow-xs transition-all cursor-pointer"
+                  disabled={isGeneratingReply}
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-indigo-100 hover:border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-bold shadow-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Suggest Reply</span>
+                  {isGeneratingReply ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  )}
+                  <span>{isGeneratingReply ? "Generating..." : "Suggest Reply"}</span>
                 </button>
               </div>
 
