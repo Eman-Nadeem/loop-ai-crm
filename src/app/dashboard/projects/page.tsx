@@ -1,30 +1,31 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Search, SlidersHorizontal, Plus, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Project, getProjects } from "@/lib/mock-data/projects";
+import { Project } from "@/lib/mock-data/projects";
 import ProjectCard from "@/components/projects/project-card";
+import { useCRM } from "@/lib/context/crm-context";
+import Dialog from "@/components/ui/dialog";
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { projects, clients, loading, addProject } = useCRM();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "completed" | "on_hold">("all");
+  
+  // Dialog Open state
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
-  useEffect(() => {
-    async function loadProjects() {
-      try {
-        const data = await getProjects();
-        setProjects(data);
-      } catch (error) {
-        console.error("Failed to load projects:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadProjects();
-  }, []);
+  // Form State
+  const [formData, setFormData] = useState({
+    name: "",
+    clientId: "",
+    status: "active" as "active" | "completed" | "on_hold",
+    budget: 0,
+    startDate: new Date().toISOString().split("T")[0],
+    deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 30 days out default
+    progress: 0,
+  });
 
   // Filter & Search Logic
   const filteredProjects = projects.filter((project) => {
@@ -43,7 +44,36 @@ export default function ProjectsPage() {
   });
 
   const handleAddNewProject = () => {
-    alert("The 'Add New Project' wizard is scoped for Future Chunks. Please check TODO.md for details!");
+    // Reset form to defaults
+    setFormData({
+      name: "",
+      clientId: clients.length > 0 ? clients[0].id : "",
+      status: "active",
+      budget: 0,
+      startDate: new Date().toISOString().split("T")[0],
+      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      progress: 0,
+    });
+    setIsAddOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.clientId) {
+      alert("Please onboard a client first before tracking a project!");
+      return;
+    }
+    
+    addProject({
+      name: formData.name,
+      clientId: formData.clientId,
+      status: formData.status,
+      budget: Number(formData.budget),
+      startDate: formData.startDate,
+      deadline: formData.deadline,
+      progress: Number(formData.progress),
+    });
+    setIsAddOpen(false);
   };
 
   return (
@@ -114,7 +144,7 @@ export default function ProjectsPage() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2">
           <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-          <span className="text-xs font-medium">Fetching project intelligence...</span>
+          <span className="text-xs font-medium">Fetching workspace projects...</span>
         </div>
       ) : filteredProjects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-slate-200 rounded-4xl bg-slate-50/50">
@@ -122,7 +152,7 @@ export default function ProjectsPage() {
           <p className="text-xs text-slate-400 mt-1">Try modifying your search keywords or resetting the filter pill.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           <AnimatePresence>
             {filteredProjects.map((project) => (
               <motion.div
@@ -139,6 +169,142 @@ export default function ProjectsPage() {
           </AnimatePresence>
         </div>
       )}
+
+      {/* Add Project Dialog Modal */}
+      <Dialog isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Track New Project">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-1">
+          {/* Project Name Field */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Project Name</label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              placeholder="e.g. Website Redesign & Branding"
+              className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
+            />
+          </div>
+
+          {/* Client Owner Field */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Client Owner</label>
+            {clients.length === 0 ? (
+              <div className="p-3 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl text-xs font-semibold">
+                No active clients found. Please onboard a client first.
+              </div>
+            ) : (
+              <select
+                value={formData.clientId}
+                onChange={(e) => setFormData((prev) => ({ ...prev, clientId: e.target.value }))}
+                className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-semibold"
+              >
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.company})
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* Status & Budget Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Project Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as any }))}
+                className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-semibold"
+              >
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="on_hold">On Hold</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Project Budget ($k)</label>
+              <input
+                type="number"
+                required
+                min={0}
+                value={formData.budget}
+                onChange={(e) => setFormData((prev) => ({ ...prev, budget: Number(e.target.value) }))}
+                placeholder="40"
+                className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
+              />
+            </div>
+          </div>
+
+          {/* Start Date & Deadline Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Start Date</label>
+              <input
+                type="date"
+                required
+                value={formData.startDate}
+                onChange={(e) => setFormData((prev) => ({ ...prev, startDate: e.target.value }))}
+                className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-semibold"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Deadline</label>
+              <input
+                type="date"
+                required
+                value={formData.deadline}
+                onChange={(e) => setFormData((prev) => ({ ...prev, deadline: e.target.value }))}
+                className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-semibold"
+              />
+            </div>
+          </div>
+
+          {/* Progress Field */}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex justify-between items-center text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+              <span>Initial Progress Percentage</span>
+              <span className="text-slate-700 font-bold">{formData.progress}%</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={formData.progress}
+                onChange={(e) => setFormData((prev) => ({ ...prev, progress: Number(e.target.value) }))}
+                className="flex-1 accent-indigo-600 bg-slate-100 h-1.5 rounded-lg appearance-none cursor-pointer"
+              />
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={formData.progress}
+                onChange={(e) => setFormData((prev) => ({ ...prev, progress: Math.min(100, Math.max(0, Number(e.target.value))) }))}
+                className="w-16 text-center text-xs px-2 py-1.5 bg-slate-50 border border-slate-100 rounded-lg focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-bold"
+              />
+            </div>
+          </div>
+
+          {/* Dialog Actions */}
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100/80 mt-2">
+            <button
+              type="button"
+              onClick={() => setIsAddOpen(false)}
+              className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-100 hover:border-slate-200 text-slate-500 hover:text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={clients.length === 0}
+              className="px-4 py-2.5 text-white bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl text-xs font-semibold shadow-md shadow-indigo-100 hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Track Project
+            </button>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 }

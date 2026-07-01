@@ -4,14 +4,16 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Calendar, DollarSign, FolderGit2 } from "lucide-react";
+import Link from "next/link";
 import { Project } from "@/lib/mock-data/projects";
 import ProgressBar from "@/components/ui/progress-bar";
 
 interface ProjectCardProps {
   project: Project;
+  condensed?: boolean;
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, condensed = false }: ProjectCardProps) {
   const { client } = project;
 
   // Status badge style mapping
@@ -35,11 +37,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   }[project.status];
 
   return (
-    <motion.div
-      whileHover={{ y: -6, scale: 1.01 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="relative group bg-white rounded-4xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:shadow-[0_15px_35px_rgba(31,32,41,0.06)] transition-shadow duration-300 min-h-[260px] overflow-hidden"
-    >
+    <Link href={`/dashboard/projects/${project.id}`} className="block h-full select-none">
+      <motion.div
+        whileHover={{ y: -6, scale: 1.01 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className="relative group bg-white rounded-4xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:shadow-[0_15px_35px_rgba(31,32,41,0.06)] transition-shadow duration-300 min-h-[260px] overflow-hidden h-full"
+      >
       {/* Top Section: Icon, Name & Status */}
       <div className="flex flex-col gap-2 items-start w-full">
         <div className="flex justify-between items-center w-full">
@@ -60,7 +63,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       </div>
 
       {/* Middle Section: Client details */}
-      {client && (
+      {!condensed && client && (
         <div className="flex items-center gap-2.5 w-full bg-slate-50/50 p-2.5 rounded-2xl border border-slate-100/50 my-3">
           <div className="relative w-8 h-8 rounded-full overflow-hidden border border-purple-200/80 bg-slate-50 shrink-0">
             <Image
@@ -110,5 +113,6 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         </div>
       </div>
     </motion.div>
+    </Link>
   );
 }

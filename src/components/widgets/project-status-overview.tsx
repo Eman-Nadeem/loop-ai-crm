@@ -4,34 +4,17 @@ import React, { useEffect, useState } from "react";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { Project, getProjects } from "@/lib/mock-data/projects";
 
+import { useCRM } from "@/lib/context/crm-context";
+
 interface ProjectStatusOverviewProps {
   projects?: Project[];
   loading?: boolean;
 }
 
 export default function ProjectStatusOverview({ projects: propProjects, loading: propLoading }: ProjectStatusOverviewProps) {
-  const [projects, setProjects] = useState<Project[]>(propProjects || []);
-  const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : !propProjects);
-
-  useEffect(() => {
-    if (propProjects) {
-      setProjects(propProjects);
-      setLoading(false);
-      return;
-    }
-
-    async function loadProjects() {
-      try {
-        const data = await getProjects();
-        setProjects(data);
-      } catch (error) {
-        console.error("Failed to load projects in ProjectStatusOverview:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadProjects();
-  }, [propProjects]);
+  const crm = useCRM();
+  const projects = propProjects || crm.projects;
+  const loading = propLoading !== undefined ? propLoading : (propProjects ? false : crm.loading);
 
   if (loading) {
     return (

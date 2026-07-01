@@ -4,37 +4,24 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Search, Send, ArrowLeft, Sparkles, Loader2, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Thread, Message, getThreads } from "@/lib/mock-data/messages";
+import { useCRM } from "@/lib/context/crm-context";
 
 export default function InboxPage() {
-  const [threads, setThreads] = useState<Thread[]>([]);
+  const { threads, loading, addMessage, markThreadAsRead } = useCRM();
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newMsgText, setNewMsgText] = useState("");
-  const [loading, setLoading] = useState(true);
   const [mobileActive, setMobileActive] = useState(false); // Controls mobile pane toggle
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Set default active thread on load
   useEffect(() => {
-    async function loadInbox() {
-      try {
-        const data = await getThreads();
-        setThreads(data);
-        // Default to selecting the first thread on desktop
-        if (data.length > 0) {
-          setActiveThreadId(data[0].clientId);
-          // Mark first thread as read
-          markThreadAsRead(data[0].clientId, data);
-        }
-      } catch (error) {
-        console.error("Failed to load threads:", error);
-      } finally {
-        setLoading(false);
-      }
+    if (!loading && threads.length > 0 && activeThreadId === null) {
+      setActiveThreadId(threads[0].clientId);
+      markThreadAsRead(threads[0].clientId);
     }
-    loadInbox();
-  }, []);
+  }, [loading, threads, activeThreadId, markThreadAsRead]);
 
   // Auto scroll to bottom of chat feed when active thread changes or messages update
   const activeThread = threads.find((t) => t.clientId === activeThreadId);
@@ -42,24 +29,9 @@ export default function InboxPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeThreadId, activeThread?.messages]);
 
-  const markThreadAsRead = (threadId: string, currentThreads: Thread[]) => {
-    setThreads((prev) => {
-      const target = prev.length > 0 ? prev : currentThreads;
-      return target.map((t) => {
-        if (t.clientId === threadId) {
-          return {
-            ...t,
-            messages: t.messages.map((m) => ({ ...m, read: true })),
-          };
-        }
-        return t;
-      });
-    });
-  };
-
   const handleSelectThread = (threadId: string) => {
     setActiveThreadId(threadId);
-    markThreadAsRead(threadId, threads);
+    markThreadAsRead(threadId);
     setMobileActive(true);
   };
 
@@ -67,28 +39,10 @@ export default function InboxPage() {
     e.preventDefault();
     if (!newMsgText.trim() || !activeThreadId) return;
 
-    const newMessage: Message = {
-      id: `me_${Date.now()}`,
-      sender: "me",
-      text: newMsgText,
-      timestamp: new Date().toISOString(),
-      read: true,
-    };
-
-    setThreads((prev) =>
-      prev.map((t) => {
-        if (t.clientId === activeThreadId) {
-          return {
-            ...t,
-            messages: [...t.messages, newMessage],
-          };
-        }
-        return t;
-      })
-    );
-
+    addMessage(activeThreadId, newMsgText, "me");
     setNewMsgText("");
   };
+
 
   const handleSuggestAIDraft = () => {
     alert("AI draft suggestion is scheduled for Chunk 5! When clicked, it will inspect this thread's context and output a suggested reply draft.");

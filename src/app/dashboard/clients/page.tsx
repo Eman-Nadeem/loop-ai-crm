@@ -1,30 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Search, SlidersHorizontal, Plus, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Client, getClients } from "@/lib/mock-data/clients";
+import { Client } from "@/lib/mock-data/clients";
 import ClientCard from "@/components/clients/client-card";
+import { useCRM } from "@/lib/context/crm-context";
+import Dialog from "@/components/ui/dialog";
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { clients, loading, addClient } = useCRM();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "freelancer" | "fiverr" | "upwork">("all");
+  
+  // Dialog Open state
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
-  useEffect(() => {
-    async function loadClients() {
-      try {
-        const data = await getClients();
-        setClients(data);
-      } catch (error) {
-        console.error("Failed to load clients:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadClients();
-  }, []);
+  // Form State
+  const [formData, setFormData] = useState({
+    name: "",
+    role: "",
+    company: "",
+    sector: "UX/UI Design" as "UX/UI Design" | "Branding" | "Media",
+    platform: "upwork" as "upwork" | "fiverr" | "freelancer",
+    budget: 0,
+    agreementStatus: "signed" as "signed" | "negotiating",
+    clientSince: new Date().toISOString().split("T")[0],
+  });
 
   // Filter & Search Logic
   const filteredClients = clients.filter((client) => {
@@ -39,7 +41,33 @@ export default function ClientsPage() {
   });
 
   const handleAddNewClient = () => {
-    alert("The 'Add New Client' wizard is scoped for Future Chunks. Please check TODO.md for details!");
+    // Reset form to defaults
+    setFormData({
+      name: "",
+      role: "",
+      company: "",
+      sector: "UX/UI Design",
+      platform: "upwork",
+      budget: 0,
+      agreementStatus: "signed",
+      clientSince: new Date().toISOString().split("T")[0],
+    });
+    setIsAddOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addClient({
+      name: formData.name,
+      role: formData.role,
+      company: formData.company,
+      sector: formData.sector,
+      platform: formData.platform,
+      budget: Number(formData.budget),
+      agreementStatus: formData.agreementStatus,
+      clientSince: formData.clientSince,
+    });
+    setIsAddOpen(false);
   };
 
   return (
@@ -130,6 +158,134 @@ export default function ClientsPage() {
           </AnimatePresence>
         </div>
       )}
+
+      {/* Add Client Dialog Modal */}
+      <Dialog isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Onboard New Client">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-1">
+          {/* Name Field */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Full Name</label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              placeholder="e.g. Sarah Jenkins"
+              className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
+            />
+          </div>
+
+          {/* Role & Company Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Job Title</label>
+              <input
+                type="text"
+                required
+                value={formData.role}
+                onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
+                placeholder="e.g. VP of Product"
+                className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Company Name</label>
+              <input
+                type="text"
+                required
+                value={formData.company}
+                onChange={(e) => setFormData((prev) => ({ ...prev, company: e.target.value }))}
+                placeholder="e.g. FlowCore"
+                className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
+              />
+            </div>
+          </div>
+
+          {/* Sector & Source Platform Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Sector</label>
+              <select
+                value={formData.sector}
+                onChange={(e) => setFormData((prev) => ({ ...prev, sector: e.target.value as any }))}
+                className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-semibold"
+              >
+                <option value="UX/UI Design">UX/UI Design</option>
+                <option value="Branding">Branding</option>
+                <option value="Media">Media</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Lead Channel</label>
+              <select
+                value={formData.platform}
+                onChange={(e) => setFormData((prev) => ({ ...prev, platform: e.target.value as any }))}
+                className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-semibold"
+              >
+                <option value="upwork">Upwork</option>
+                <option value="fiverr">Fiverr</option>
+                <option value="freelancer">Freelancer</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Budget & Status Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Contract Budget ($k)</label>
+              <input
+                type="number"
+                required
+                min={0}
+                value={formData.budget}
+                onChange={(e) => setFormData((prev) => ({ ...prev, budget: Number(e.target.value) }))}
+                placeholder="100"
+                className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Agreement Status</label>
+              <select
+                value={formData.agreementStatus}
+                onChange={(e) => setFormData((prev) => ({ ...prev, agreementStatus: e.target.value as any }))}
+                className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-semibold"
+              >
+                <option value="signed">Signed</option>
+                <option value="negotiating">Negotiating</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Client Since date */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Client Since</label>
+            <input
+              type="date"
+              required
+              value={formData.clientSince}
+              onChange={(e) => setFormData((prev) => ({ ...prev, clientSince: e.target.value }))}
+              className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-semibold"
+            />
+          </div>
+
+          {/* Dialog Actions */}
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100/80 mt-2">
+            <button
+              type="button"
+              onClick={() => setIsAddOpen(false)}
+              className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-100 hover:border-slate-200 text-slate-500 hover:text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2.5 text-white bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl text-xs font-semibold shadow-md shadow-indigo-100 hover:shadow-lg transition-all cursor-pointer"
+            >
+              Onboard Client
+            </button>
+          </div>
+        </form>
+      </Dialog>
     </div>
   );
 }

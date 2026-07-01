@@ -110,3 +110,21 @@ export async function getProjects(): Promise<Project[]> {
     }, 100);
   });
 }
+
+export async function getProjectById(id: string): Promise<Project | undefined> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const project = mockProjects.find((p) => p.id === id);
+      if (!project) {
+        resolve(undefined);
+        return;
+      }
+      const client = mockClients.find((c) => c.id === project.clientId);
+      resolve({
+        ...project,
+        client
+      });
+    }, 100);
+  });
+}
+

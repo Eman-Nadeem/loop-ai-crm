@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Mail, Star } from "lucide-react";
+import Link from "next/link";
 import { Client } from "@/lib/mock-data/clients";
 
 interface ClientCardProps {
@@ -53,31 +54,40 @@ export default function ClientCard({ client }: ClientCardProps) {
   };
 
   return (
-    <motion.div
-      whileHover={{ y: -6, scale: 1.01 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="relative group bg-white rounded-4xl border border-slate-100 p-6 flex flex-col items-center justify-between text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:shadow-[0_15px_35px_rgba(31,32,41,0.06)] transition-shadow duration-300 min-h-[260px] overflow-hidden"
-    >
-      {/* Top Action Overlay - Slides in on hover */}
-      <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
-        {/* Mail Button */}
-        <motion.button
-          initial={{ opacity: 0, y: -10 }}
-          whileHover={{ scale: 1.05 }}
-          className="pointer-events-auto p-2 bg-white border border-slate-100 hover:border-purple-100 hover:bg-purple-50 text-slate-400 hover:text-purple-600 rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100 duration-200 cursor-pointer"
-        >
-          <Mail className="w-4 h-4" />
-        </motion.button>
+    <Link href={`/dashboard/clients/${client.id}`} className="block h-full select-none">
+      <motion.div
+        whileHover={{ y: -6, scale: 1.01 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className="relative group bg-white rounded-4xl border border-slate-100 p-6 flex flex-col items-center justify-between text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:shadow-[0_15px_35px_rgba(31,32,41,0.06)] transition-shadow duration-300 min-h-[260px] overflow-hidden h-full"
+      >
+        {/* Top Action Overlay - Slides in on hover */}
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+          {/* Mail Button */}
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            whileHover={{ scale: 1.05 }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="pointer-events-auto p-2 bg-white border border-slate-100 hover:border-purple-100 hover:bg-purple-50 text-slate-400 hover:text-purple-600 rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100 duration-200 cursor-pointer"
+          >
+            <Mail className="w-4 h-4" />
+          </motion.button>
 
-        {/* Star Button */}
-        <motion.button
-          initial={{ opacity: 0, y: -10 }}
-          whileHover={{ scale: 1.05 }}
-          className="pointer-events-auto p-2 bg-white border border-slate-100 hover:border-yellow-100 hover:bg-yellow-50 text-slate-400 hover:text-yellow-500 rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100 duration-200 cursor-pointer"
-        >
-          <Star className="w-4 h-4" />
-        </motion.button>
-      </div>
+          {/* Star Button */}
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            whileHover={{ scale: 1.05 }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="pointer-events-auto p-2 bg-white border border-slate-100 hover:border-yellow-100 hover:bg-yellow-50 text-slate-400 hover:text-yellow-500 rounded-full shadow-sm transition-all opacity-0 group-hover:opacity-100 duration-200 cursor-pointer"
+          >
+            <Star className="w-4 h-4" />
+          </motion.button>
+        </div>
 
       {/* Profile Details Container */}
       <div className="flex flex-col items-center pt-2">
@@ -133,5 +143,6 @@ export default function ClientCard({ client }: ClientCardProps) {
         </div>
       </div>
     </motion.div>
+    </Link>
   );
 }

@@ -45,6 +45,14 @@ This file tracks the implemented features and flags out-of-scope work serving as
 - **Client-Side Mount Gates**: Set up standard hydration locks to guarantee absolute SSR compatibility.
 - **Polished Landing Page**: Cleaned up dev markers and added all dashboard modules to the splash feature highlights list.
 
+### Chunk 6: Client & Project Detail Views with Edit/Delete
+- **Dynamic Navigation Wiring**: Wrapped directory card elements in route-highlighting Links pointing to their respect detail dynamic routes.
+- **Unified Session Store (`src/lib/context/crm-context.tsx`)**: Lifted mock data collections into a shared React Context wrapper, enabling reactive session-based CRUD state propagation across all pages, metrics, and widgets.
+- **Client Detail View (`/dashboard/clients/[id]`)**: Full-featured overview with platform badges, financial budget, dynamic deliverables lists, read-only communications previews, and edit/delete handlers.
+- **Project Detail View (`/dashboard/projects/[id]`)**: Comprehensive detail view featuring progress bar tracking, deadlines, budgets, and clickable client owner reference link cards.
+- **Custom Overlay Primitives**: Hand-rolled transition overlays (`Dialog` and `AlertDialog`) built with Framer Motion and Tailwind CSS v4 to keep forms and confirmation boxes lightweight and premium.
+- **Toast Notifications**: Interactive slide-in notifications delivering toast signals for CRUD outcomes.
+
 ---
 
 ## Out of Scope / Upcoming Chunks
@@ -56,8 +64,6 @@ This file tracks the implemented features and flags out-of-scope work serving as
   - Integrate a "Suggest Reply" hook in the Inbox chat pane that pulls current message history as system context to draft responses.
 
 ### 2. Client Interactions & Details
-- **Client Detail View**
-  - A dedicated view (`/dashboard/clients/[id]`) showing historical contracts, active deliverables, payment history, and communication logs.
 - **Add New Client Wizard**
   - A step-by-step form to onboard new clients, choose their primary source platform, input budgets, select sectors, and send initial agreement drafts.
 

@@ -5,34 +5,17 @@ import Image from "next/image";
 import { ChevronRight, Loader2, CheckCircle2 } from "lucide-react";
 import { Thread, getThreads } from "@/lib/mock-data/messages";
 
+import { useCRM } from "@/lib/context/crm-context";
+
 interface UnreadSummaryProps {
   threads?: Thread[];
   loading?: boolean;
 }
 
 export default function UnreadSummary({ threads: propThreads, loading: propLoading }: UnreadSummaryProps) {
-  const [threads, setThreads] = useState<Thread[]>(propThreads || []);
-  const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : !propThreads);
-
-  useEffect(() => {
-    if (propThreads) {
-      setThreads(propThreads);
-      setLoading(false);
-      return;
-    }
-
-    async function loadThreads() {
-      try {
-        const data = await getThreads();
-        setThreads(data);
-      } catch (error) {
-        console.error("Failed to load threads in UnreadSummary:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadThreads();
-  }, [propThreads]);
+  const crm = useCRM();
+  const threads = propThreads || crm.threads;
+  const loading = propLoading !== undefined ? propLoading : (propThreads ? false : crm.loading);
 
   if (loading) {
     return (

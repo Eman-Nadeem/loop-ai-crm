@@ -4,34 +4,17 @@ import React, { useEffect, useState } from "react";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { Client, getClients } from "@/lib/mock-data/clients";
 
+import { useCRM } from "@/lib/context/crm-context";
+
 interface AgreementsOverviewProps {
   clients?: Client[];
   loading?: boolean;
 }
 
 export default function AgreementsOverview({ clients: propClients, loading: propLoading }: AgreementsOverviewProps) {
-  const [clients, setClients] = useState<Client[]>(propClients || []);
-  const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : !propClients);
-
-  useEffect(() => {
-    if (propClients) {
-      setClients(propClients);
-      setLoading(false);
-      return;
-    }
-
-    async function loadClients() {
-      try {
-        const data = await getClients();
-        setClients(data);
-      } catch (error) {
-        console.error("Failed to load clients in AgreementsOverview:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadClients();
-  }, [propClients]);
+  const crm = useCRM();
+  const clients = propClients || crm.clients;
+  const loading = propLoading !== undefined ? propLoading : (propClients ? false : crm.loading);
 
   if (loading) {
     return (

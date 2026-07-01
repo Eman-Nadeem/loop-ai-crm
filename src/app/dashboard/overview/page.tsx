@@ -7,8 +7,7 @@ import { Users, Briefcase, DollarSign, FileCheck, ArrowRight, Loader2 } from "lu
 import ClientCard from "@/components/clients/client-card";
 import AgreementsOverview from "@/components/widgets/agreements-overview";
 import ClientsSource from "@/components/widgets/clients-source";
-import { getOverviewStats, OverviewStats } from "@/lib/mock-data/overview";
-import { Client, getClients } from "@/lib/mock-data/clients";
+import { useCRM } from "@/lib/context/crm-context";
 
 interface StatCardProps {
   title: string;
@@ -59,29 +58,9 @@ function StatCard({ title, value, icon, description, themeColor }: StatCardProps
 }
 
 export default function OverviewPage() {
-  const [stats, setStats] = useState<OverviewStats | null>(null);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { clients, projects, loading } = useCRM();
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [statsData, clientsData] = await Promise.all([
-          getOverviewStats(),
-          getClients(),
-        ]);
-        setStats(statsData);
-        setClients(clientsData);
-      } catch (error) {
-        console.error("Failed to load overview data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
-
-  if (loading || !stats) {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-slate-400 gap-2">
         <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
@@ -89,6 +68,12 @@ export default function OverviewPage() {
       </div>
     );
   }
+
+  // Compute metrics dynamically from state
+  const totalClients = clients.length;
+  const activeProjects = projects.filter((p) => p.status === "active").length;
+  const totalBudget = clients.reduce((sum, c) => sum + c.budget, 0);
+  const signedAgreements = clients.filter((c) => c.agreementStatus === "signed").length;
 
   const recentClients = clients.slice(0, 4);
 
@@ -109,28 +94,28 @@ export default function OverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         <StatCard
           title="Total Clients"
-          value={stats.totalClients}
+          value={totalClients}
           icon={<Users className="w-5 h-5" />}
           description="Integrated accounts across Upwork, Freelancer, and Fiverr"
           themeColor="purple"
         />
         <StatCard
           title="Active Projects"
-          value={stats.activeProjects}
+          value={activeProjects}
           icon={<Briefcase className="w-5 h-5" />}
           description="Ongoing deliverables with active tracking setup"
           themeColor="amber"
         />
         <StatCard
           title="Revenue / Budget"
-          value={`$${(stats.totalBudget).toLocaleString()}k`}
+          value={`$${totalBudget.toLocaleString()}k`}
           icon={<DollarSign className="w-5 h-5" />}
           description="Aggregated budget across all active contracts"
           themeColor="emerald"
         />
         <StatCard
           title="Signed Agreements"
-          value={stats.signedAgreements}
+          value={signedAgreements}
           icon={<FileCheck className="w-5 h-5" />}
           description="Contracts fully executed and approved by both parties"
           themeColor="rose"
