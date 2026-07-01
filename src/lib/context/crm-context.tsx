@@ -6,6 +6,17 @@ import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
 import { Client, mockClients } from "@/lib/mock-data/clients";
 import { Project, mockProjects } from "@/lib/mock-data/projects";
 import { Thread, Message, mockThreads } from "@/lib/mock-data/messages";
+import {
+  fetchCRMState,
+  createClientDb,
+  updateClientDb,
+  deleteClientDb,
+  createProjectDb,
+  updateProjectDb,
+  deleteProjectDb,
+  addMessageDb,
+  markThreadReadDb
+} from "@/lib/actions/crm-actions";
 
 export interface Toast {
   id: string;
@@ -60,21 +71,41 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize data on mount
   useEffect(() => {
-    // Resolve references
-    const resolvedProjects = mockProjects.map((proj) => ({
-      ...proj,
-      client: mockClients.find((c) => c.id === proj.clientId),
-    }));
+    async function loadData() {
+      try {
+        console.log("[CRM Context] Loading state from remote database...");
+        const state = await fetchCRMState();
+        
+        setClients(state.clients);
+        setProjects(state.projects as Project[]);
+        setThreads(state.threads as Thread[]);
+        console.log("[CRM Context] Database connected successfully.");
+      } catch (error) {
+        console.warn(
+          "[CRM Context] Database URL not configured or connection failed. Falling back to local session store.",
+          error
+        );
 
-    const resolvedThreads = mockThreads.map((thread) => ({
-      ...thread,
-      client: mockClients.find((c) => c.id === thread.clientId),
-    }));
+        // Resolve local references for fallback
+        const resolvedProjects = mockProjects.map((proj) => ({
+          ...proj,
+          client: mockClients.find((c) => c.id === proj.clientId),
+        }));
 
-    setClients(mockClients);
-    setProjects(resolvedProjects);
-    setThreads(resolvedThreads);
-    setLoading(false);
+        const resolvedThreads = mockThreads.map((thread) => ({
+          ...thread,
+          client: mockClients.find((c) => c.id === thread.clientId),
+        }));
+
+        setClients(mockClients);
+        setProjects(resolvedProjects);
+        setThreads(resolvedThreads);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    loadData();
   }, []);
 
   const removeToast = useCallback((id: string) => {
@@ -96,37 +127,42 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
     return clients.find((c) => c.id === id);
   }, [clients]);
 
-  const addClient = useCallback((newClientData: Omit<Client, "id" | "avatarUrl" | "activeProjects">) => {
-    setClients((prevClients) => {
-      // Find a safe numeric ID
-      const numericIds = prevClients.map((c) => parseInt(c.id)).filter((id) => !isNaN(id));
-      const nextId = (numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1).toString();
-      
-      const avatarUrl = PRESET_AVATARS[Math.floor(Math.random() * PRESET_AVATARS.length)];
-      
-      const newClient: Client = {
-        ...newClientData,
-        id: nextId,
-        avatarUrl,
-        activeProjects: 0,
-      };
+  const addClient = useCallback(async (newClientData: Omit<Client, "id" | "avatarUrl" | "activeProjects">) => {
+    // Generate new unique ID
+    const numericIds = clients.map((c) => parseInt(c.id)).filter((id) => !isNaN(id));
+    const nextId = (numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1).toString();
+    const avatarUrl = PRESET_AVATARS[Math.floor(Math.random() * PRESET_AVATARS.length)];
+    
+    const newClient: Client = {
+      ...newClientData,
+      id: nextId,
+      avatarUrl,
+      activeProjects: 0,
+    };
 
-      // Create an empty thread for inbox capabilities
-      setThreads((prevThreads) => [
-        ...prevThreads,
-        {
-          clientId: nextId,
-          client: newClient,
-          messages: [],
-        }
-      ]);
+    // 1. Optimistic local state update
+    setClients((prev) => [...prev, newClient]);
+    setThreads((prevThreads) => [
+      ...prevThreads,
+      {
+        clientId: nextId,
+        client: newClient,
+        messages: [],
+      }
+    ]);
 
+    // 2. Persist to DB asynchronously
+    try {
+      await createClientDb(newClient);
       addToast("Client onboarded successfully!", "success");
-      return [...prevClients, newClient];
-    });
-  }, [addToast]);
+    } catch (e) {
+      console.warn("[CRM Context DB Error] Failed to persist client to DB. Active in-memory session only.", e);
+      addToast("Onboarded client (session-only).", "info");
+    }
+  }, [clients, addToast]);
 
-  const updateClient = useCallback((id: string, updated: Partial<Client>) => {
+  const updateClient = useCallback(async (id: string, updated: Partial<Client>) => {
+    // 1. Local state update
     setClients((prevClients) => {
       const nextClients = prevClients.map((c) => (c.id === id ? { ...c, ...updated } : c));
       
@@ -152,22 +188,35 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
         })
       );
 
-      addToast("Client updated successfully!", "success");
       return nextClients;
     });
+
+    // 2. Persist to DB
+    try {
+      // Exclude relational objects / internal fields
+      const { id: cId, activeProjects, ...persistData } = updated as any;
+      await updateClientDb(id, persistData);
+      addToast("Client updated successfully!", "success");
+    } catch (e) {
+      console.warn("[CRM Context DB Error] Failed to persist client updates.", e);
+      addToast("Client updated (session-only).", "info");
+    }
   }, [addToast]);
 
-  const deleteClient = useCallback((id: string) => {
-    // 1. Remove the client
+  const deleteClient = useCallback(async (id: string) => {
+    // 1. Local cascade delete
     setClients((prev) => prev.filter((c) => c.id !== id));
-    
-    // 2. Cascade delete: remove all projects belonging to this client
     setProjects((prev) => prev.filter((p) => p.clientId !== id));
-
-    // 3. Remove thread for this client
     setThreads((prev) => prev.filter((t) => t.clientId !== id));
 
-    addToast("Client and associated projects deleted.", "info");
+    // 2. Persist delete
+    try {
+      await deleteClientDb(id);
+      addToast("Client and projects deleted successfully.", "info");
+    } catch (e) {
+      console.warn("[CRM Context DB Error] Failed to persist client deletion.", e);
+      addToast("Client deleted (session-only).", "info");
+    }
   }, [addToast]);
 
   // Project actions
@@ -175,39 +224,46 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
     return projects.find((p) => p.id === id);
   }, [projects]);
 
-  const addProject = useCallback((newProjectData: Omit<Project, "id" | "progress"> & { progress?: number }) => {
-    setProjects((prevProjects) => {
-      const id = `p${Date.now()}`;
-      const client = clients.find((c) => c.id === newProjectData.clientId);
-      
-      const newProject: Project = {
-        ...newProjectData,
-        id,
-        progress: newProjectData.progress !== undefined ? newProjectData.progress : 0,
-        client,
-      };
+  const addProject = useCallback(async (newProjectData: Omit<Project, "id" | "progress"> & { progress?: number }) => {
+    const id = `p${Date.now()}`;
+    const client = clients.find((c) => c.id === newProjectData.clientId);
+    
+    const newProject: Project = {
+      ...newProjectData,
+      id,
+      progress: newProjectData.progress !== undefined ? newProjectData.progress : 0,
+      client,
+    };
 
-      // If status is active, increment client's active project count
-      if (newProject.status === "active") {
-        setClients((prevClients) =>
-          prevClients.map((c) =>
-            c.id === newProject.clientId
-              ? { ...c, activeProjects: c.activeProjects + 1 }
-              : c
-          )
-        );
-      }
+    // 1. Local update
+    setProjects((prev) => [...prev, newProject]);
+    if (newProject.status === "active") {
+      setClients((prevClients) =>
+        prevClients.map((c) =>
+          c.id === newProject.clientId
+            ? { ...c, activeProjects: c.activeProjects + 1 }
+            : c
+        )
+      );
+    }
 
+    // 2. Persist
+    try {
+      // Omit relational client reference from database insert payload
+      const { client: _, ...persistPayload } = newProject as any;
+      await createProjectDb(persistPayload);
       addToast("Project registered successfully!", "success");
-      return [...prevProjects, newProject];
-    });
+    } catch (e) {
+      console.warn("[CRM Context DB Error] Failed to persist project.", e);
+      addToast("Project registered (session-only).", "info");
+    }
   }, [clients, addToast]);
 
-  const updateProject = useCallback((id: string, updated: Partial<Project>) => {
+  const updateProject = useCallback(async (id: string, updated: Partial<Project>) => {
+    // 1. Local update
     setProjects((prev) => {
       const nextProjs = prev.map((p) => (p.id === id ? { ...p, ...updated } : p));
       
-      // Sync active projects counts for client
       const projectToUpdate = prev.find((p) => p.id === id);
       if (projectToUpdate && updated.status !== undefined && updated.status !== projectToUpdate.status) {
         const cId = projectToUpdate.clientId;
@@ -216,18 +272,26 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
           prevClients.map((c) => (c.id === cId ? { ...c, activeProjects: count } : c))
         );
       }
-
-      addToast("Project updated successfully!", "success");
       return nextProjs;
     });
+
+    // 2. Persist
+    try {
+      const { client: _, id: __, ...persistPayload } = updated as any;
+      await updateProjectDb(id, persistPayload);
+      addToast("Project updated successfully!", "success");
+    } catch (e) {
+      console.warn("[CRM Context DB Error] Failed to persist project updates.", e);
+      addToast("Project updated (session-only).", "info");
+    }
   }, [addToast]);
 
-  const deleteProject = useCallback((id: string) => {
+  const deleteProject = useCallback(async (id: string) => {
+    // 1. Local update
     setProjects((prev) => {
       const projectToDelete = prev.find((p) => p.id === id);
       const nextProjs = prev.filter((p) => p.id !== id);
 
-      // Decrement client's activeProjects if the deleted project was active
       if (projectToDelete && projectToDelete.status === "active") {
         const cId = projectToDelete.clientId;
         const count = nextProjs.filter((p) => p.clientId === cId && p.status === "active").length;
@@ -235,22 +299,31 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
           prevClients.map((c) => (c.id === cId ? { ...c, activeProjects: count } : c))
         );
       }
-
-      addToast("Project deleted successfully.", "info");
       return nextProjs;
     });
+
+    // 2. Persist
+    try {
+      await deleteProjectDb(id);
+      addToast("Project deleted successfully.", "info");
+    } catch (e) {
+      console.warn("[CRM Context DB Error] Failed to delete project.", e);
+      addToast("Project deleted (session-only).", "info");
+    }
   }, [addToast]);
 
   // Messages / Threads actions
-  const addMessage = useCallback((clientId: string, text: string, sender: "me" | "client") => {
+  const addMessage = useCallback(async (clientId: string, text: string, sender: "me" | "client") => {
+    const mId = `${sender}_${Date.now()}`;
     const newMessage: Message = {
-      id: `${sender}_${Date.now()}`,
+      id: mId,
       sender,
       text,
       timestamp: new Date().toISOString(),
       read: sender === "me",
     };
 
+    // 1. Local update
     setThreads((prev) =>
       prev.map((t) => {
         if (t.clientId === clientId) {
@@ -262,9 +335,24 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
         return t;
       })
     );
+
+    // 2. Persist
+    try {
+      await addMessageDb({
+        id: mId,
+        clientId,
+        sender,
+        text,
+        timestamp: newMessage.timestamp,
+        read: newMessage.read,
+      });
+    } catch (e) {
+      console.warn("[CRM Context DB Error] Failed to persist message to DB.", e);
+    }
   }, []);
 
-  const markThreadAsRead = useCallback((clientId: string) => {
+  const markThreadAsRead = useCallback(async (clientId: string) => {
+    // 1. Local update
     setThreads((prev) =>
       prev.map((t) => {
         if (t.clientId === clientId) {
@@ -276,6 +364,13 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
         return t;
       })
     );
+
+    // 2. Persist
+    try {
+      await markThreadReadDb(clientId);
+    } catch (e) {
+      console.warn("[CRM Context DB Error] Failed to mark messages as read.", e);
+    }
   }, []);
 
   return (
