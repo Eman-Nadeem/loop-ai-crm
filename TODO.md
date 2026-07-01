@@ -1,12 +1,28 @@
-# LoopAI CRM — Future Implementation Roadmap (TODO)
+# LoopAI CRM — Product Roadmap & Progress (TODO)
 
-This file flags the out-of-scope features and pages for Chunk 1, serving as a roadmap for subsequent chunks.
+This file tracks the implemented features and flags out-of-scope work serving as a roadmap for subsequent chunks.
+
+## Completed / Implemented
+
+### Chunk 1: Client Directory & Setup
+- **Clients Directory Page (`/dashboard/clients`)**: Search, platform filter pills, and responsive client card grid.
+- **Interactive Card Hover States**: Spring-lift animation, overlay actions.
+- **Agreements Overview Widget**: Custom progress bar representing contract phases.
+- **Clients Source Widget**: Platform proportional segmentation bar and tips.
+- **AI Relationship Assistant**: Clerk-protected sidebar chat UI connected to OpenRouter.
+
+### Chunk 2: Dashboard Overview & Real Navigation (Current)
+- **Dashboard Overview Landing Page (`/dashboard/overview`)**: High-level financial reporting (Total Clients, Active Projects, Revenue Budget, Signed Agreements), inline widgets integration, and Recent Clients listing.
+- **Real Navigation Wiring**: Real App Router routes and active route state highlighting on the TopNav bar.
+- **Dynamic Data Aggregation (`src/lib/mock-data/overview.ts`)**: Dynamically computes stats from the mock database, maintaining synchronization between pages.
+- **Placeholder Dashboards**: Scaffolding for Projects, Inbox, and Analytics.
+- **Performance Optimizations**: Smoothed grid filtering animations to eliminate Framer Motion lag.
+
+---
 
 ## Out of Scope / Upcoming Chunks
 
-### 1. Dashboard Pages
-- **Overview Page (`/dashboard/overview`)**
-  - High-level financial reporting, active projects status count, and team allocation details.
+### 1. Dashboard Pages Detail
 - **Projects Page (`/dashboard/projects`)**
   - Deliverable timelines, interactive Kanban board/Gantt chart, and repository linkages.
 - **Inbox Page (`/dashboard/inbox`)**

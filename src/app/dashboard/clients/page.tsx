@@ -51,9 +51,9 @@ export default function ClientsPage() {
         </div>
 
         {/* Search, Filter Icon, Add Button */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {/* Interactive Search Bar */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto flex-1 sm:flex-initial">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
@@ -72,7 +72,7 @@ export default function ClientsPage() {
           {/* Add Client Button */}
           <button
             onClick={handleAddNewClient}
-            className="flex items-center gap-2 px-4 py-2.5 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-100 hover:shadow-lg transition-all cursor-pointer"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-100 hover:shadow-lg transition-all cursor-pointer flex-1 sm:flex-initial"
           >
             <Plus className="w-4 h-4" />
             <span>Add new Client</span>
@@ -113,25 +113,22 @@ export default function ClientsPage() {
           <p className="text-xs text-slate-400 mt-1">Try modifying your search keywords or resetting the filter pill.</p>
         </div>
       ) : (
-        <motion.div
-          layout
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-6"
-        >
-          <AnimatePresence mode="popLayout">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <AnimatePresence>
             {filteredClients.map((client) => (
               <motion.div
-                layout
+                layout="position"
                 key={client.id}
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
                 <ClientCard client={client} />
               </motion.div>
             ))}
           </AnimatePresence>
-        </motion.div>
+        </div>
       )}
     </div>
   );

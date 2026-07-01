@@ -1,6 +1,6 @@
 # LoopAI CRM — AI Agent Handoff Guide (GEMINI.md)
 
-Welcome! This document provides context on the codebase, tech stack, and instructions for future AI models/agents to continue development from **Chunk 2** onwards.
+Welcome! This document provides context on the codebase, tech stack, and instructions for future AI models/agents to continue development from **Chunk 3** onwards.
 
 ---
 
@@ -28,41 +28,59 @@ d:\loop-ai-crm/
 │   ├── proxy.ts            # Clerk route protection (Next 16 Proxy convention)
 │   ├── app/
 │   │   ├── layout.tsx      # App wrapper (Inter font, ClerkProvider, global styles)
-│   │   ├── page.tsx        # Dashboard Landing/Splash page
+│   │   ├── page.tsx        # Landing/Splash page with Enter CRM CTA
 │   │   ├── sign-in/        # Clerk standard login route
 │   │   ├── sign-up/        # Clerk standard signup route
 │   │   ├── api/
 │   │   │   └── chat/
 │   │   │       └── route.ts # AI assistant route handler
 │   │   └── dashboard/
-│   │       ├── layout.tsx  # Full-screen flat dashboard layout
-│   │       └── clients/
-│   │           └── page.tsx # Client Directory (search, filter pills, grid)
+│   │       ├── layout.tsx  # Shared shell layout (handles conditional widgets and viewports)
+│   │       ├── page.tsx    # Redirects /dashboard -> /dashboard/overview
+│   │       ├── overview/
+│   │       │   └── page.tsx # Overview Dashboard (Stat cards, inline widgets, Recent Clients)
+│   │       ├── clients/
+│   │       │   └── page.tsx # Client Directory (search, filter pills, grid)
+│   │       ├── projects/
+│   │       │   └── page.tsx # Projects "Coming soon" placeholder
+│   │       ├── inbox/
+│   │       │   └── page.tsx # Inbox "Coming soon" placeholder
+│   │       └── analytics/
+│   │           └── page.tsx # Analytics "Coming soon" placeholder
 │   ├── components/
 │   │   ├── clients/
 │   │   │   └── client-card.tsx # Client profile cards (Framer Motion hovers)
 │   │   ├── dashboard/
-│   │   │   └── top-nav.tsx     # Full-width navigation bar
+│   │   │   └── top-nav.tsx     # Fully responsive navigation bar (hamburger menu on mobile)
 │   │   └── widgets/
-│   │       ├── agreements-overview.tsx # Custom gradient contracts progress bar
-│   │       ├── clients-source.tsx      # Proportional platform segmented bar
+│   │       ├── agreements-overview.tsx # Agreements progress bar (dynamic metrics)
+│   │       ├── clients-source.tsx      # Proportional platform segmented bar (dynamic metrics)
 │   │       └── ai-assistant.tsx        # Interactive chat UI
 │   └── lib/
 │       ├── ai/
-│       │   └── chat.ts                 # OpenRouter API client with mock fallback
+│       │   └── chat.ts                 # OpenRouter API client with dynamic system context
 │       └── mock-data/
-│           └── clients.ts              # Typed client data loaders (12 records)
+│           ├── clients.ts              # Typed client data loaders (extended with agreements and project stats)
+│           └── overview.ts             # Mock data aggregator for overview metrics
 ```
 
 ---
 
-## 3. Core Features Implemented (Chunk 1)
+## 3. Core Features Implemented
 
+### Chunk 1
 1. **Clients Directory Page:** Responsive grid displaying client profiles matching the mockup. Supports real-time query search and platform-specific filtering ("Freelancer", "Fiverr", "Upwork").
 2. **Interactive Cards:** Hovering on client cards triggers a spring-lift elevation and slides in message and bookmark action overlays.
-3. **Agreements Overview Widget:** Hand-rolled visual progress bar displaying signed contracts vs negotiations, complete with directional markers and custom striped canvas backgrounds.
+3. **Agreements Overview Widget:** Hand-rolled progress bar displaying signed contracts vs negotiations.
 4. **Clients Source Widget:** Proportional segment bar displaying leads distribution, paired with auto-generated optimization recommendations.
-5. **AI Assistant Chat:** An interactive sidebar chat UI. It communicates with a Next.js API handler which appends full CRM client metadata and metrics to the system prompt.
+5. **AI Assistant Chat:** Interactive sidebar chat UI communicating with a Next.js API handler which appends CRM metadata to the system prompt.
+
+### Chunk 2
+1. **Dashboard Overview Page (`/dashboard/overview`)**: Built the main landing dashboard incorporating a top row of summary stat cards (Total Clients, Active Projects, Revenue Budget, and Signed Agreements), inline widgets, and a Recent Clients grid.
+2. **Real Nav Wiring**: Connected all TopNav tabs to actual Next.js App Router paths with route-based active visual highlighting. Added a responsive hamburger drawer for mobile viewports.
+3. **Full-Browser Layout & Shell Flexibility**: Refactored the dashboard shell to span edge-to-edge in the browser, showing global gradient background glows. Configured sidebar widgets to only render the AI Assistant on non-clients pages.
+4. **Dynamic Data Aggregations**: Removed all hardcoded metrics by writing a calculator module `overview.ts` to compute metrics dynamically from `clients.ts` (keeping metrics consistent across pages).
+5. **Layout Shift & Animation Fixes**: Prevented layout jumps on navigation by reserving scrollbar space (`scrollbar-gutter: stable`) and tab sizes (transparent borders). Replaced CSS Grid layout transitions with `layout="position"` to fix filtering lag.
 
 ---
 
@@ -81,6 +99,13 @@ d:\loop-ai-crm/
 > - Use `rounded-4xl` instead of custom Arbitrary values like `rounded-[2rem]`.
 > - Use `-ml-px` instead of `-ml-[1px]`, and `mt-[-4px]` instead of `-mt-[4px]`.
 
+> [!IMPORTANT]
+> **Responsive-First Design Requirements**
+> Ensure all new pages, layouts, and components are fully responsive across all breakpoints (mobile, tablet, desktop):
+> - Avoid hardcoded fixed-width elements (e.g., `w-[400px]`) that can clip or cause horizontal overflow on mobile.
+> - Utilize Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`, `xl:`) to structure grids and flex containers adaptively.
+> - Nav bars, filters, and action buttons rows must wrap (`flex-wrap`) or support horizontal scrolling (`overflow-x-auto`) to fit small viewports.
+
 ### AI Integration Details
 - **Free Auto-Routing:** The API client in [src/lib/ai/chat.ts](file:///d:/loop-ai-crm/src/lib/ai/chat.ts) uses `model: "openrouter/free"`. This dynamically maps to active free models on OpenRouter, avoiding rate limits or deprecation errors.
 - **Payload Limits:** The payload includes `max_tokens: 1000` to prevent token budget conflicts on unpaid/free OpenRouter accounts.
@@ -88,9 +113,9 @@ d:\loop-ai-crm/
 
 ---
 
-## 5. Next Development Step (Chunk 2)
+## 5. Next Development Step (Chunk 3)
 
 Refer to **[TODO.md](file:///d:/loop-ai-crm/TODO.md)** for details on the upcoming modules:
 - Create client detail profiles under `/dashboard/clients/[id]`.
 - Implement server-side CRUD workflows and bind the application to a persistent database (Supabase/PostgreSQL).
-- Scaffold the remaining navigation dashboards (Overview, Projects, Inbox, Analytics).
+- Build out the rest of the dashboards (Projects, Inbox, Analytics).

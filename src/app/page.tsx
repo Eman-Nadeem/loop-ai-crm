@@ -70,7 +70,7 @@ export default function Home() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-center">
           <Link
-            href="/dashboard/clients"
+            href="/dashboard/overview"
             className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl text-sm font-semibold shadow-md shadow-indigo-100 hover:shadow-lg transition-all cursor-pointer"
           >
             <span>Enter CRM Dashboard</span>

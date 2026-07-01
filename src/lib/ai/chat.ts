@@ -12,9 +12,15 @@ export async function callLLM(messages: ChatMessage[]): Promise<string> {
   const clientContext = mockClients
     .map(
       (c) =>
-        `- Name: ${c.name}, Role: ${c.role}, Company: ${c.company}, Platform: ${c.platform}, Sector: ${c.sector}, Budget: $${c.budget}`
+        `- Name: ${c.name}, Role: ${c.role}, Company: ${c.company}, Platform: ${c.platform}, Sector: ${c.sector}, Budget: $${c.budget}, Status: ${c.agreementStatus}, Active Projects: ${c.activeProjects}`
     )
     .join("\n");
+
+  const upworkCount = mockClients.filter((c) => c.platform === "upwork").length;
+  const freelancerCount = mockClients.filter((c) => c.platform === "freelancer").length;
+  const fiverrCount = mockClients.filter((c) => c.platform === "fiverr").length;
+  const signedCount = mockClients.filter((c) => c.agreementStatus === "signed").length;
+  const negotiatingCount = mockClients.filter((c) => c.agreementStatus === "negotiating").length;
 
   const systemPrompt = `You are LoopAI Assistant, an intelligence bot built into the LoopAI CRM dashboard.
 Your goal is to help freelancers and design agencies manage their client relationships, optimize their profiles, and grow their revenues.
@@ -24,8 +30,8 @@ ${clientContext}
 
 Metrics:
 - Total active clients: ${mockClients.length}
-- Platform breakdown: 7 Upwork, 5 Freelancer, 2 Fiverr
-- Agreements: 9 Signed Contracts, 5 Ongoing Negotiations
+- Platform breakdown: ${upworkCount} Upwork, ${freelancerCount} Freelancer, ${fiverrCount} Fiverr
+- Agreements: ${signedCount} Signed Contracts, ${negotiatingCount} Ongoing Negotiations
 
 Guidelines:
 1. Provide highly actionable, concise, and professional responses.
@@ -52,7 +58,7 @@ Guidelines:
       return `To find new clients and expand your pipeline:
 
 1. **Target the Media Sector**: You currently have 4 clients in the **Media** sector (Isabella Hart, Michael Anderson, Madeline Brooks, Daniel Martinez). Create a specialized case study folder displaying your work for TechWave and OpsMaster, and use it to pitch similar companies.
-2. **Optimize Fiverr Gig**: Fiverr is currently your lowest source of clients (only 2 clients: Victoria Lane and David Johnson). Try updating your gig descriptions with keywords like "Enterprise Branding" or "SaaS UX Design" to capture higher budget clients.
+2. **Optimize Fiverr Gig**: Fiverr is currently your lowest source of clients (only ${fiverrCount} clients: Victoria Lane and David Johnson). Try updating your gig descriptions with keywords like "Enterprise Branding" or "SaaS UX Design" to capture higher budget clients.
 3. **Active Outreaching**: Promote your Product Design work on Freelancer and Upwork, focusing on high-ticket branding contracts (your average budget for branding is over $160).`;
     }
 
@@ -60,7 +66,7 @@ Guidelines:
     return `Hello! I am your LoopAI Assistant. 
 
 Currently, I am operating in *Mock Mode* because your \`OPENROUTER_API_KEY\` is not set in \`.env.local\`. However, looking at your CRM dashboard:
-- You have **${mockClients.length} active clients** across Upwork (7), Freelancer (5), and Fiverr (2).
+- You have **${mockClients.length} active clients** across Upwork (${upworkCount}), Freelancer (${freelancerCount}), and Fiverr (${fiverrCount}).
 - Your total contract portfolio is worth **$${mockClients.reduce((acc, c) => acc + c.budget, 0)}**.
 - Fiverr represents your lowest lead channel. I recommend optimizing your Fiverr profiles.
 

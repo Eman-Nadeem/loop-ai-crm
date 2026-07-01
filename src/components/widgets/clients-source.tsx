@@ -1,16 +1,62 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ChevronRight, Loader2 } from "lucide-react";
+import { Client, getClients } from "@/lib/mock-data/clients";
 
-export default function ClientsSource() {
-  const upwork = 7;
-  const freelancer = 5;
-  const fiverr = 2;
+interface ClientsSourceProps {
+  clients?: Client[];
+  loading?: boolean;
+}
+
+export default function ClientsSource({ clients: propClients, loading: propLoading }: ClientsSourceProps) {
+  const [clients, setClients] = useState<Client[]>(propClients || []);
+  const [loading, setLoading] = useState(propLoading !== undefined ? propLoading : !propClients);
+
+  useEffect(() => {
+    if (propClients) {
+      setClients(propClients);
+      setLoading(false);
+      return;
+    }
+
+    async function loadClients() {
+      try {
+        const data = await getClients();
+        setClients(data);
+      } catch (error) {
+        console.error("Failed to load clients in ClientsSource:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadClients();
+  }, [propClients]);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all flex items-center justify-center min-h-[220px]">
+        <Loader2 className="w-5 h-5 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  const upwork = clients.filter((c) => c.platform === "upwork").length;
+  const freelancer = clients.filter((c) => c.platform === "freelancer").length;
+  const fiverr = clients.filter((c) => c.platform === "fiverr").length;
   const total = upwork + freelancer + fiverr;
 
-  const upworkPercentage = (upwork / total) * 100;
-  const freelancerPercentage = (freelancer / total) * 100;
-  const fiverrPercentage = (fiverr / total) * 100;
+  const upworkPercentage = total > 0 ? (upwork / total) * 100 : 0;
+  const freelancerPercentage = total > 0 ? (freelancer / total) * 100 : 0;
+  const fiverrPercentage = total > 0 ? (fiverr / total) * 100 : 0;
+
+  // Dynamically find the platform with the lowest client count
+  const platforms = [
+    { name: "Upwork", count: upwork },
+    { name: "Freelancer", count: freelancer },
+    { name: "Fiverr", count: fiverr },
+  ];
+  const lowestPlatform = platforms.reduce((min, p) => (p.count < min.count ? p : min), platforms[0]);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all flex flex-col gap-4">
@@ -23,25 +69,31 @@ export default function ClientsSource() {
       </div>
 
       {/* Segmented Bar */}
-      <div className="h-10 w-full flex gap-1 rounded-xl overflow-hidden">
+      <div className="h-10 w-full flex gap-1 rounded-xl overflow-hidden bg-slate-50">
         {/* Upwork Segment (Yellow-Orange Pastel) */}
-        <div
-          style={{ width: `${upworkPercentage}%` }}
-          className="h-full bg-linear-to-r from-[#ffe4e6] to-[#fed7aa] rounded-l-md"
-          title={`Upwork: ${upwork} clients`}
-        />
+        {upwork > 0 && (
+          <div
+            style={{ width: `${upworkPercentage}%` }}
+            className="h-full bg-linear-to-r from-[#ffe4e6] to-[#fed7aa] rounded-l-md"
+            title={`Upwork: ${upwork} clients`}
+          />
+        )}
         {/* Freelancer Segment (Blue-Purple Pastel) */}
-        <div
-          style={{ width: `${freelancerPercentage}%` }}
-          className="h-full bg-linear-to-r from-[#dbeafe] to-[#e0e7ff]"
-          title={`Freelancer: ${freelancer} clients`}
-        />
+        {freelancer > 0 && (
+          <div
+            style={{ width: `${freelancerPercentage}%` }}
+            className="h-full bg-linear-to-r from-[#dbeafe] to-[#e0e7ff]"
+            title={`Freelancer: ${freelancer} clients`}
+          />
+        )}
         {/* Fiverr Segment (Pink Pastel) */}
-        <div
-          style={{ width: `${fiverrPercentage}%` }}
-          className="h-full bg-linear-to-r from-[#fce7f3] to-[#ffe4e6] rounded-r-md"
-          title={`Fiverr: ${fiverr} clients`}
-        />
+        {fiverr > 0 && (
+          <div
+            style={{ width: `${fiverrPercentage}%` }}
+            className="h-full bg-linear-to-r from-[#fce7f3] to-[#ffe4e6] rounded-r-md"
+            title={`Fiverr: ${fiverr} clients`}
+          />
+        )}
       </div>
 
       {/* Labels Row */}
@@ -61,18 +113,20 @@ export default function ClientsSource() {
       </div>
 
       {/* Insights Tip Box */}
-      <div className="bg-[#eef2ff] border border-indigo-50/50 rounded-xl p-3.5 flex items-start gap-3 mt-1 shadow-sm">
-        {/* Loop Icon (Mini Purple Logo) */}
-        <div className="shrink-0 w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center mt-0.5 shadow-sm">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7C4.747 9.547 4.7 10.768 4.7 12s.047 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.092-1.209.138-2.43.138-3.662z" />
-          </svg>
+      {total > 0 && (
+        <div className="bg-[#eef2ff] border border-indigo-50/50 rounded-xl p-3.5 flex items-start gap-3 mt-1 shadow-sm">
+          {/* Loop Icon (Mini Purple Logo) */}
+          <div className="shrink-0 w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center mt-0.5 shadow-sm">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7C4.747 9.547 4.7 10.768 4.7 12s.047 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.092-1.209.138-2.43.138-3.662z" />
+            </svg>
+          </div>
+          <p className="text-xs text-indigo-900 leading-relaxed font-medium">
+            Pay attention to {lowestPlatform.name} — where the fewest orders come from:{" "}
+            <span className="font-semibold underline cursor-pointer hover:text-indigo-700">optimize your profile</span> to fix this.
+          </p>
         </div>
-        <p className="text-xs text-indigo-900 leading-relaxed font-medium">
-          Pay attention to Fiverr — where the fewest orders come from:{" "}
-          <span className="font-semibold underline cursor-pointer hover:text-indigo-700">optimize your profile</span> to fix this.
-        </p>
-      </div>
+      )}
     </div>
   );
 }

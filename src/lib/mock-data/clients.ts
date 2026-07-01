@@ -7,6 +7,8 @@ export interface Client {
   sector: 'UX/UI Design' | 'Branding' | 'Media';
   budget: number;
   avatarUrl: string;
+  agreementStatus: 'signed' | 'negotiating';
+  activeProjects: number;
 }
 
 export const mockClients: Client[] = [
@@ -18,7 +20,9 @@ export const mockClients: Client[] = [
     platform: "upwork",
     sector: "UX/UI Design",
     budget: 150,
-    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "signed",
+    activeProjects: 1
   },
   {
     id: "2",
@@ -28,7 +32,9 @@ export const mockClients: Client[] = [
     platform: "freelancer",
     sector: "Branding",
     budget: 120,
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "negotiating",
+    activeProjects: 0
   },
   {
     id: "3",
@@ -38,7 +44,9 @@ export const mockClients: Client[] = [
     platform: "upwork",
     sector: "Media",
     budget: 75,
-    avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "signed",
+    activeProjects: 1
   },
   {
     id: "4",
@@ -48,7 +56,9 @@ export const mockClients: Client[] = [
     platform: "freelancer",
     sector: "Branding",
     budget: 200,
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "signed",
+    activeProjects: 2
   },
   {
     id: "5",
@@ -58,7 +68,9 @@ export const mockClients: Client[] = [
     platform: "upwork",
     sector: "Media",
     budget: 90,
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "negotiating",
+    activeProjects: 0
   },
   {
     id: "6",
@@ -68,7 +80,9 @@ export const mockClients: Client[] = [
     platform: "fiverr",
     sector: "Branding",
     budget: 250,
-    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "signed",
+    activeProjects: 1
   },
   {
     id: "7",
@@ -78,7 +92,9 @@ export const mockClients: Client[] = [
     platform: "freelancer",
     sector: "Media",
     budget: 180,
-    avatarUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "signed",
+    activeProjects: 1
   },
   {
     id: "8",
@@ -88,7 +104,9 @@ export const mockClients: Client[] = [
     platform: "upwork",
     sector: "UX/UI Design",
     budget: 80,
-    avatarUrl: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "negotiating",
+    activeProjects: 0
   },
   {
     id: "9",
@@ -98,7 +116,9 @@ export const mockClients: Client[] = [
     platform: "upwork",
     sector: "Media",
     budget: 230,
-    avatarUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "signed",
+    activeProjects: 2
   },
   {
     id: "10",
@@ -108,7 +128,9 @@ export const mockClients: Client[] = [
     platform: "fiverr",
     sector: "Branding",
     budget: 140,
-    avatarUrl: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "signed",
+    activeProjects: 1
   },
   {
     id: "11",
@@ -118,7 +140,9 @@ export const mockClients: Client[] = [
     platform: "freelancer",
     sector: "UX/UI Design",
     budget: 100,
-    avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "negotiating",
+    activeProjects: 0
   },
   {
     id: "12",
@@ -128,7 +152,9 @@ export const mockClients: Client[] = [
     platform: "freelancer",
     sector: "Branding",
     budget: 110,
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80"
+    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80",
+    agreementStatus: "signed",
+    activeProjects: 1
   }
 ];
 
