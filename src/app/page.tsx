@@ -33,7 +33,7 @@ export default function Home() {
         {/* Glow badge */}
         <div className="flex items-center gap-2 px-3 py-1 bg-purple-50 border border-purple-100 rounded-full text-purple-700 text-xs font-semibold">
           <Sparkles className="w-3.5 h-3.5 fill-purple-200" />
-          <span>Chunk 1 Setup Completed</span>
+          <span>CRM Platform Live & Active</span>
         </div>
 
         {/* Title */}
@@ -51,19 +51,23 @@ export default function Home() {
         <div className="w-full flex flex-col gap-2.5 text-left border-y border-slate-100 py-6 my-2">
           <div className="flex items-center gap-3 text-xs font-medium text-slate-600">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>Responsive Client cards with interactive Framer Motion states</span>
+            <span>Overview dashboard with dynamic metrics aggregation</span>
           </div>
           <div className="flex items-center gap-3 text-xs font-medium text-slate-600">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>Interactive search and platform-specific filter pills</span>
+            <span>Filterable client directory with spring hover-lift cards</span>
           </div>
           <div className="flex items-center gap-3 text-xs font-medium text-slate-600">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>Custom-designed Agreements & Lead Source visual widgets</span>
+            <span>Projects panel with progress meters and custom status segmented bars</span>
           </div>
           <div className="flex items-center gap-3 text-xs font-medium text-slate-600">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>AI Relationship Assistant connected to OpenRouter (Gemini API)</span>
+            <span>Edge-to-edge Inbox messaging hub and live thread selectors</span>
+          </div>
+          <div className="flex items-center gap-3 text-xs font-medium text-slate-600">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>Integrated AI Assistant and relationship coaches</span>
           </div>
         </div>
 

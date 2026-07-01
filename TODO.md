@@ -25,23 +25,34 @@ This file tracks the implemented features and flags out-of-scope work serving as
 - **Reusable Progress Bar (`src/components/ui/progress-bar.tsx`)**: Extracted component for multi-view progress representation.
 - **Project Status Overview Widget (`src/components/widgets/project-status-overview.tsx`)**: Dynamic segmented ratios bar displaying status aggregates and context-aware client follow-up suggestions in the sidebar.
 
-### Chunk 4: Inbox Hub & Unified Messaging (Current)
+### Chunk 4: Inbox Hub & Unified Messaging
 - **Inbox Messaging Hub (`/dashboard/inbox`)**: Responsive split-pane email/chat layout featuring a searchable left thread list and scroll-to-bottom right message feed (sent vs. received colored bubbles).
 - **Mock Messages Database (`src/lib/mock-data/messages.ts`)**: Seeded conversation histories interlinked with client profiles, tracking read/unread flags per message.
 - **Unread Status Sidebar Widget (`src/components/widgets/unread-summary.tsx`)**: Displays pending unread client messages count, and snippets in the sidebar.
 - **Dynamic State Actions**: Toggling active threads automatically updates read states. Local message inputs push new messages straight to the active feed in real-time.
 - **Responsive Viewport Toggles**: Implemented mobile active state switching with header back buttons to prevent column squishing.
 
+### Chunk 5: Widescreen Analytics Dashboard (Current)
+- **Performance Analytics Dashboard (`/dashboard/analytics`)**: Replaced placeholder with a dynamic, data-dense, full-width performance reporting interface.
+- **Time-Series Mock Database (`src/lib/mock-data/analytics.ts`)**: Designed a 6-month historical monthly database (Jan - Jun 2026), dynamically deriving current month aggregates from clients/projects mock layers.
+- **Dynamic Trend Indicators**: Stat cards calculate real growth trends comparing current and previous months (e.g. Revenue `+11.3%` and Projects `+25%`).
+- **Interactive Recharts Graphs**:
+  - Revenue vs Target Budget area chart.
+  - Signed vs Negotiating contracts stacked area pipeline.
+  - Platform Source stacked growth bar chart.
+  - Projects status donut breakdown chart.
+- **Full-Width Layout Refactor**: Configured the sidebar to collapse and main container to take up `lg:col-span-12` on the Analytics route.
+- **Client-Side Mount Gates**: Set up standard hydration locks to guarantee absolute SSR compatibility.
+- **Polished Landing Page**: Cleaned up dev markers and added all dashboard modules to the splash feature highlights list.
+
 ---
 
 ## Out of Scope / Upcoming Chunks
 
-### 1. Dashboard Pages Detail
-- **Analytics Page (`/dashboard/analytics`)**
-  - Deep-dive charts tracking monthly revenue growth, client acquisition cost, and average contract lifecycle.
+### 1. Interactive Extensions
 - **Projects Interactive Expansion**
   - Interactive Kanban board toggle, Gantt chart timelines, and repository linkages.
-- **AI Suggest-Reply Expansion (Chunk 5)**
+- **AI Suggest-Reply Expansion**
   - Integrate a "Suggest Reply" hook in the Inbox chat pane that pulls current message history as system context to draft responses.
 
 ### 2. Client Interactions & Details
