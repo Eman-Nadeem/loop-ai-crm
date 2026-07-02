@@ -41,7 +41,7 @@ export default function ProjectCard({ project, condensed = false }: ProjectCardP
       <motion.div
         whileHover={{ y: -6, scale: 1.01 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="relative group bg-white rounded-4xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:shadow-[0_15px_35px_rgba(31,32,41,0.06)] transition-shadow duration-300 min-h-[260px] overflow-hidden h-full"
+        className="relative group bg-white rounded-4xl border border-slate-200 hover:border-slate-300 p-6 flex flex-col justify-between shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:shadow-[0_15px_35px_rgba(31,32,41,0.06)] transition-all duration-300 min-h-[260px] overflow-hidden h-full"
       >
       {/* Top Section: Icon, Name & Status */}
       <div className="flex flex-col gap-2 items-start w-full">

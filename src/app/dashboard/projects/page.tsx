@@ -5,6 +5,8 @@ import { Search, SlidersHorizontal, Plus, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Project } from "@/lib/mock-data/projects";
 import ProjectCard from "@/components/projects/project-card";
+import KanbanView from "@/components/projects/kanban-view";
+import GanttView from "@/components/projects/gantt-view";
 import { useCRM } from "@/lib/context/crm-context";
 import Dialog from "@/components/ui/dialog";
 
@@ -12,6 +14,7 @@ export default function ProjectsPage() {
   const { projects, clients, loading, addProject } = useCRM();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "completed" | "on_hold">("all");
+  const [projectsView, setProjectsView] = useState<"grid" | "kanban" | "gantt">("grid");
   
   // Dialog Open state
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -21,7 +24,7 @@ export default function ProjectsPage() {
     name: "",
     clientId: "",
     status: "active" as "active" | "completed" | "on_hold",
-    budget: 0,
+    budget: "" as any,
     startDate: new Date().toISOString().split("T")[0],
     deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 30 days out default
     progress: 0,
@@ -49,7 +52,7 @@ export default function ProjectsPage() {
       name: "",
       clientId: clients.length > 0 ? clients[0].id : "",
       status: "active",
-      budget: 0,
+      budget: "" as any,
       startDate: new Date().toISOString().split("T")[0],
       deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
       progress: 0,
@@ -113,46 +116,87 @@ export default function ProjectsPage() {
           </button>
         </div>
       </div>
+      {/* Filter Pills & View Switcher Row */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-3">
+        {/* Filter Pills */}
+        {projectsView !== "kanban" ? (
+          <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-none">
+            {(["all", "active", "completed", "on_hold"] as const).map((filter) => {
+              const isActive = activeFilter === filter;
+              const label = 
+                filter === "all" 
+                  ? "All Projects" 
+                  : filter === "on_hold"
+                    ? "On Hold"
+                    : filter.charAt(0).toUpperCase() + filter.slice(1);
+              return (
+                <button
+                  key={filter}
+                  onClick={() => setActiveFilter(filter)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all border cursor-pointer ${
+                    isActive
+                      ? "bg-slate-900 border-slate-900 text-white shadow-sm"
+                      : "bg-white hover:bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="hidden sm:block flex-1" />
+        )}
 
-      {/* Filter Pills */}
-      <div className="flex items-center gap-2 border-b border-slate-100 pb-2 overflow-x-auto whitespace-nowrap scrollbar-none">
-        {(["all", "active", "completed", "on_hold"] as const).map((filter) => {
-          const isActive = activeFilter === filter;
-          const label = 
-            filter === "all" 
-              ? "All Projects" 
-              : filter === "on_hold"
-                ? "On Hold"
-                : filter.charAt(0).toUpperCase() + filter.slice(1);
-          return (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all border cursor-pointer ${
-                isActive
-                  ? "bg-slate-900 border-slate-900 text-white shadow-sm"
-                  : "bg-white hover:bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              {label}
-            </button>
-          );
-        })}
+        {/* View Switcher (Segmented buttons) */}
+        <div className="flex items-center bg-slate-50 border border-slate-100 p-0.5 rounded-xl self-start sm:self-auto shadow-xs shrink-0">
+          {(["grid", "kanban", "gantt"] as const).map((view) => {
+            const isActive = projectsView === view;
+            const label = view.charAt(0).toUpperCase() + view.slice(1);
+            return (
+              <button
+                key={view}
+                onClick={() => setProjectsView(view)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  isActive
+                    ? "bg-white text-slate-800 shadow-xs border border-slate-200/40 font-extrabold"
+                    : "text-slate-400 hover:text-slate-700 bg-transparent border border-transparent"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Project Card Grid */}
+      {/* Views rendering */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-2">
           <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
           <span className="text-xs font-medium">Fetching workspace projects...</span>
         </div>
+      ) : projectsView === "kanban" ? (
+        <KanbanView
+          projects={projects.filter((p) => {
+            const clientName = p.client?.name || "";
+            const clientCompany = p.client?.company || "";
+            return (
+              p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              clientCompany.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+          })}
+        />
+      ) : projectsView === "gantt" ? (
+        <GanttView projects={filteredProjects} />
       ) : filteredProjects.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-slate-200 rounded-4xl bg-slate-50/50">
           <p className="text-sm font-semibold text-slate-500">No projects match your filter or query.</p>
           <p className="text-xs text-slate-400 mt-1">Try modifying your search keywords or resetting the filter pill.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnimatePresence>
             {filteredProjects.map((project) => (
               <motion.div
@@ -229,7 +273,7 @@ export default function ProjectsPage() {
                 required
                 min={0}
                 value={formData.budget}
-                onChange={(e) => setFormData((prev) => ({ ...prev, budget: Number(e.target.value) }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, budget: e.target.value as any }))}
                 placeholder="40"
                 className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
               />

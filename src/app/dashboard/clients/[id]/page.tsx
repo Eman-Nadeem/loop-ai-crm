@@ -49,7 +49,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
     company: "",
     sector: "UX/UI Design" as "UX/UI Design" | "Branding" | "Media",
     platform: "upwork" as "upwork" | "fiverr" | "freelancer",
-    budget: 0,
+    budget: "" as any,
     agreementStatus: "signed" as "signed" | "negotiating",
     clientSince: "",
   });
@@ -426,7 +426,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
                 required
                 min={0}
                 value={formData.budget}
-                onChange={(e) => setFormData((prev) => ({ ...prev, budget: Number(e.target.value) }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, budget: e.target.value as any }))}
                 placeholder="100"
                 className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
               />

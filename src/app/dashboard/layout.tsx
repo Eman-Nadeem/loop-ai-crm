@@ -20,7 +20,7 @@ export default function DashboardLayout({
   const isInboxPage = pathname === "/dashboard/inbox";
   const isAnalyticsPage = pathname === "/dashboard/analytics";
 
-  const isFullWidthPage = isInboxPage || isAnalyticsPage;
+  const isFullWidthPage = isInboxPage || isAnalyticsPage || isProjectsPage;
 
   return (
     <CRMProvider>

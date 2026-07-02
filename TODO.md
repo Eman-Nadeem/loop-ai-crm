@@ -18,7 +18,7 @@ This file tracks the implemented features and flags out-of-scope work serving as
 - **Placeholder Dashboards**: Scaffolding for Projects, Inbox, and Analytics.
 - **Performance Optimizations**: Smoothed grid filtering animations to eliminate Framer Motion lag.
 
-### Chunk 3: Projects Page & Shared UI UI Extras
+### Chunk 3: Projects Page & Shared UI Extras
 - **Projects Directory Page (`/dashboard/projects`)**: Responsive grid displaying projects, search query filters, and status pills (All, Active, Completed, On Hold).
 - **Referential Projects Database (`src/lib/mock-data/projects.ts`)**: Interlocked project records connected to existing client avatars, names, and organizations.
 - **Project Card UI Component (`src/components/projects/project-card.tsx`)**: Reusable project cards displaying names, progress values, budgets, deadlines, and status badges.
@@ -32,50 +32,59 @@ This file tracks the implemented features and flags out-of-scope work serving as
 - **Dynamic State Actions**: Toggling active threads automatically updates read states. Local message inputs push new messages straight to the active feed in real-time.
 - **Responsive Viewport Toggles**: Implemented mobile active state switching with header back buttons to prevent column squishing.
 
-### Chunk 5: Widescreen Analytics Dashboard (Current)
+### Chunk 5: Widescreen Analytics Dashboard
 - **Performance Analytics Dashboard (`/dashboard/analytics`)**: Replaced placeholder with a dynamic, data-dense, full-width performance reporting interface.
 - **Time-Series Mock Database (`src/lib/mock-data/analytics.ts`)**: Designed a 6-month historical monthly database (Jan - Jun 2026), dynamically deriving current month aggregates from clients/projects mock layers.
 - **Dynamic Trend Indicators**: Stat cards calculate real growth trends comparing current and previous months (e.g. Revenue `+11.3%` and Projects `+25%`).
-- **Interactive Recharts Graphs**:
-  - Revenue vs Target Budget area chart.
-  - Signed vs Negotiating contracts stacked area pipeline.
-  - Platform Source stacked growth bar chart.
-  - Projects status donut breakdown chart.
+- **Interactive Recharts Graphs**: Revenue vs Target area chart, Signed vs Negotiating stacked pipeline, Platform Source growth bars, Projects status donut breakdown.
 - **Full-Width Layout Refactor**: Configured the sidebar to collapse and main container to take up `lg:col-span-12` on the Analytics route.
-- **Client-Side Mount Gates**: Set up standard hydration locks to guarantee absolute SSR compatibility.
-- **Polished Landing Page**: Cleaned up dev markers and added all dashboard modules to the splash feature highlights list.
 
 ### Chunk 6: Client & Project Detail Views with Edit/Delete
-- **Dynamic Navigation Wiring**: Wrapped directory card elements in route-highlighting Links pointing to their respect detail dynamic routes.
+- **Dynamic Navigation Wiring**: Wrapped directory card elements in route-highlighting Links pointing to their respective dynamic detail routes.
 - **Unified Session Store (`src/lib/context/crm-context.tsx`)**: Lifted mock data collections into a shared React Context wrapper, enabling reactive session-based CRUD state propagation across all pages, metrics, and widgets.
 - **Client Detail View (`/dashboard/clients/[id]`)**: Full-featured overview with platform badges, financial budget, dynamic deliverables lists, read-only communications previews, and edit/delete handlers.
 - **Project Detail View (`/dashboard/projects/[id]`)**: Comprehensive detail view featuring progress bar tracking, deadlines, budgets, and clickable client owner reference link cards.
 - **Custom Overlay Primitives**: Hand-rolled transition overlays (`Dialog` and `AlertDialog`) built with Framer Motion and Tailwind CSS v4 to keep forms and confirmation boxes lightweight and premium.
 - **Toast Notifications**: Interactive slide-in notifications delivering toast signals for CRUD outcomes.
 
+### Chunk 7: Add Client/Project, Database Persistence & AI Suggest-Reply
+- **Add New Client Dialog (`/dashboard/clients`)**: Full creation form (name, role, company, sector, platform, budget, agreement status, client-since date) mounted on the "Add new Client" button using the custom `Dialog` overlay. Auto-assigns a portrait from a preset Unsplash avatar pool.
+- **Add New Project Dialog (`/dashboard/projects`)**: Full creation form with a dynamic Client Owner dropdown sourced from context, status, budget, dates, and progress slider. Validates that at least one client exists before enabling submission.
+- **Supabase PostgreSQL Integration (Drizzle ORM)**: Configured Drizzle ORM with a PostgreSQL schema (`clients`, `projects`, `messages` tables with cascade deletes). Added `drizzle.config.ts`, `db:push`, and `db:seed` npm scripts.
+- **Server Actions CRUD Layer (`src/lib/actions/crm-actions.ts`)**: All create/update/delete operations call Next.js Server Actions that write directly to Supabase. Reads are resolved on mount via `fetchCRMState()`.
+- **Resilient Context Fallback**: If `DATABASE_URL` is not set, the app silently falls back to the in-memory mock session store — no crashes.
+- **AI Suggest-Reply in Inbox**: Clicking "Suggest Reply" in the Inbox chat pane calls `/api/chat/suggest-reply`, which builds a context-aware system prompt (client profile + last N messages) and loads the LLM draft directly into the message input for review before sending. Falls back to keyword-matched mock drafts if OpenRouter key is missing.
+- **Environment Template (`.env.local.example`)**: Safe placeholder env file committed to GitHub; `.env.local` is blocked in `.gitignore`.
+
+### Chunk 8: Projects Kanban & Gantt Views
+- **View Switcher:** Added a segmented button group at the top of the Projects page to switch between Grid, Kanban, and Gantt views.
+- **Kanban Board View:** Designed a three-column drag-and-drop board (**On Hold**, **Active**, and **Completed**) using `@dnd-kit/core`.
+  - Redesigned Kanban cards to be super compact, rendering only the project name and the status-matching progress bar.
+  - Locked completed project cards by setting `disabled: true` on the draggable hook. Dragging a project to Completed automatically marks its progress as 100% and triggers a success Toast.
+  - Hidden scrollbars while maintaining column list scrollability.
+- **Custom Gantt Timeline:** Built a custom CSS Grid-based horizontal project timeline displaying start dates and deadlines, color-coded by status.
+  - Added an interactive Pointer resize handle on the right edge of each project bar. Resizing modifies deadlines dynamically on drag, displaying a real-time dark date tooltip.
+  - Introduced a floating "Save Deadlines" action banner fixed at the bottom-right viewport position, styled exactly like a toast notification.
+  - Set timeline bars to use rectangular shapes (`rounded-none`) to align with grid lines.
+  - Configured background lines at both month starts and month ends using `border-l last:border-r` with visible `z-0` rendering behind timeline rows.
+  - Modified responsiveness: on viewports smaller than 1024px (`lg` breakpoint), the sticky left deliverables list is hidden to make room, showing only the horizontally scrollable timeline.
+  - Reduced the sticky left deliverables column width from `w-72` to `w-56` (224px).
+  - Added an absolute z-indexed hover overlay card that expands to reveal the full project name and its client owner details over the timeline, preventing any deliverables layout shifting.
+- **Widescreen Projects Grid:** Updated the project directory grid view to display 4 project cards per row on larger desktop widths (`xl:grid-cols-4`).
+- **Numeric Fields Cleared Typing Fix:** Fixed input locks on budget numeric fields across both creation forms and edit dialogs on the project and client detail pages, allowing the fields to be cleared and typed freely.
+
 ---
 
 ## Out of Scope / Upcoming Chunks
 
-### 1. Interactive Extensions
-- **Projects Interactive Expansion**
-  - Interactive Kanban board toggle, Gantt chart timelines, and repository linkages.
-- **AI Suggest-Reply Expansion**
-  - Integrate a "Suggest Reply" hook in the Inbox chat pane that pulls current message history as system context to draft responses.
-
-### 2. Client Interactions & Details
-- **Add New Client Wizard**
-  - A step-by-step form to onboard new clients, choose their primary source platform, input budgets, select sectors, and send initial agreement drafts.
-
-### 3. Backend & Data Layer
-- **Persistent Database Integration**
-  - Set up Supabase PostgreSQL or SQLite with Drizzle/Prisma ORM.
-  - Implement server actions for CRUD operations on clients, replacing `getClients()` in `src/lib/mock-data/clients.ts`.
-- **Database Migrations & Seed Scripts**
-  - Production database schema definition and testing seed datasets.
-
-### 4. Advanced AI & Non-Free APIs
+### 1. Advanced AI & Workspace Intelligence
 - **Real-Time Workspace Sync**
-  - Let the AI Assistant inspect actual active deliverables and chats to answer complex questions (e.g. "What is the status of Daniel's wireframe deliverable?").
+  - Connect the AI Assistant widget to the PostgreSQL database, enabling it to query live deliverables, clients, and timelines to answer user questions (e.g. "Which projects are past their deadlines?").
 - **Alternative LLM Providers**
-  - Integration with premium, non-free providers (e.g., OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, Gemini Pro) with configurable temperature, cost-monitoring, and custom system-instruction toggles.
+  - Integration with premium models (e.g., OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, Gemini Pro) with configurable parameter controls.
+
+### 2. Production Hardening
+- **Row-Level Security (RLS)**: Define Supabase RLS policies to scope data access per authenticated user/organization.
+- **Multi-Tenant Org Support**: Bind clients and projects to Clerk Organization IDs so each organization sees only its own data.
+- **Real-Time Subscriptions**: Use Supabase Realtime channels to push live updates across browser tabs without polling.
+

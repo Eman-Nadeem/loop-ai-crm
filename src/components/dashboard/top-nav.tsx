@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import { Plus, Menu, X } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function TopNav() {
   const pathname = usePathname();
@@ -109,12 +110,19 @@ export default function TopNav() {
             <Link
               key={item.label}
               href={item.href}
-              className={`px-4 py-1.5 text-sm font-semibold rounded-full border transition-all cursor-pointer ${
+              className={`relative px-4 py-1.5 text-sm font-semibold transition-colors duration-200 cursor-pointer ${
                 isActive
-                  ? "bg-white border-slate-300 text-slate-800 shadow-xs"
-                  : "bg-transparent border-transparent text-slate-400 hover:text-slate-700"
+                  ? "text-slate-800"
+                  : "text-slate-400 hover:text-slate-700"
               }`}
             >
+              {isActive && (
+                <motion.span
+                  layoutId="activeNavBorder"
+                  className="absolute inset-0 bg-white border-2 border-purple-700 rounded-full -z-10 shadow-xs"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
               {item.label}
             </Link>
           );
