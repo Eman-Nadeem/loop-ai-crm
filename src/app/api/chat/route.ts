@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { callLLM } from "@/lib/ai/chat";
+import { getWorkspaceContext } from "@/lib/ai/workspace-context";
 
 export async function POST(req: Request) {
   try {
@@ -12,9 +13,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const reply = await callLLM(messages);
+    const lastMessage = messages[messages.length - 1]?.content || "";
+    const { contextText, isGrounded } = await getWorkspaceContext(lastMessage);
 
-    return NextResponse.json({ content: reply });
+    const reply = await callLLM(messages, contextText);
+
+    return NextResponse.json({ content: reply, isGrounded });
   } catch (error: any) {
     console.error("[Chat Route Error]:", error);
     return NextResponse.json(

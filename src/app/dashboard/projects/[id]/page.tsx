@@ -189,7 +189,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       </div>
 
       {/* Key Info Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Budget Card */}
         <div className="bg-white border border-slate-100 rounded-3xl p-5 flex flex-col justify-between shadow-[0_2px_15px_rgba(0,0,0,0.005)] min-h-[105px]">
           <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">

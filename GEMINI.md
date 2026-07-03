@@ -169,6 +169,20 @@ d:\loop-ai-crm/
    - **Email Viewer state (`[clientId]/[emailId]`):** Standalone email reader detailing sender/receiver metadata, full message body, mock paperclip attachment cards, and a reply box with AI suggestions triggers (hidden for outgoing sent emails).
    - **Infinite Render Loop Fix:** Added an unread check to `useEffect` trigger before invoking `markThreadAsRead` context state changes, breaking recursive rendering loops.
 
+### Chunk 10
+1. **Dedicated AI Page (`/dashboard/ai`):** Built a premium, full-width chat interface for the AI Copilot. Integrated navigation items in top nav links and mobile drawers, replacing the previous connected platform badges placeholder.
+2. **Simplified Layout Architecture:** Removed sidebars (`AIAssistant`, `AgreementsOverview`, `ClientsSource`, `ProjectStatusOverview`) from Overview, Clients directory, and Projects detail pages, scaling them to take up the full desktop and mobile viewports.
+3. **Workspace Context Assembler (`workspace-context.ts`):** Creates server-side text summaries of clients, projects, unread email activity, and budget pipelines via SQL/Drizzle queries, falling back gracefully to mock templates if database access fails.
+4. **Intent-Based Keyword Routing:** Detects overdue project deadlines, unread incoming emails, aggregated budgets, or specific client/company name targets, keeping token sizes minimal.
+5. **Grounded Tags & Suggested Chips:** Shows a Check badge indicator `"Based on your live workspace data"` below grounded AI replies. Displays 3 preset question chips above the chat input box to guide grounded queries.
+6. **Beautiful Fallback Formatting:** Formats and prints raw database context blocks cleanly with markdown formatting in the chat history if `OPENROUTER_API_KEY` is not present, avoiding misalignment issues.
+
+### Chunk 11
+1. **Responsive Header Breakpoint Shift:** Shifted the main navigation and drawer control layout transitions in `top-nav.tsx` from `md` (768px) to `lg` (1024px). This fits all navigation items, shortcut badges, and account controls comfortably on tablet/medium viewports without overflow clipping.
+2. **Scrollbar Gutter Gap Eliminated:** Removed `scrollbar-gutter: stable` and hid root page scrollbars in `globals.css`. This removes the default Windows gray track scrollbar track gap on the right edge of the header and main viewport, letting content and header containers scale seamlessly to 100% of the screen.
+3. **Responsive Metadata Grids:** Restructured key information grids on both Client Detail and Project Detail pages from `grid-cols-2 md:grid-cols-4` to `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`. This ensures metadata values (budgets, start dates, and deadlines) scale and stack safely on narrow mobile devices without wrapping or layout clipping.
+4. **Proportional Directory Grids:** Updated page directory grids on Clients and Overview views to use `lg:grid-cols-3` instead of keeping 2 columns from `md` up to `xl`.
+
 ---
 
 ## 4. Key Conventions & Rules for Future Agents
@@ -229,9 +243,9 @@ Context (state + DB sync): `src/lib/context/crm-context.tsx`
 
 ---
 
-## 6. Next Development Step (Chunk 9)
+## 6. Next Development Step (Chunk 12)
 
 Refer to **[TODO.md](file:///d:/loop-ai-crm/TODO.md)** for the upcoming modules:
-- **Real-Time Workspace Sync**: Connect the AI Assistant to live DB queries so it can answer questions about specific client deliverables.
-- **Production Hardening**: RLS policies, Clerk Org-scoped data, Supabase Realtime subscriptions.
+- **Production Hardening**: Set up Supabase RLS (Row-Level Security) policies and organization filters in Clerk (org ID scoping) to isolate tenant data. This is now highly urgent since the AI Copilot exposes full workspace summaries.
+- **Real-Time Subscriptions**: Use Supabase Realtime channels to push live updates across browser tabs without polling.
 

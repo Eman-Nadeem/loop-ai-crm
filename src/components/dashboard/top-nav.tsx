@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
-import { Plus, Menu, X } from "lucide-react";
+import { Plus, Menu, X, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function TopNav() {
@@ -20,9 +20,9 @@ export default function TopNav() {
   ];
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between px-6 py-4 border-b border-slate-100/80 bg-white/80 backdrop-blur-md gap-2 md:gap-0 sticky top-0 z-50">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between px-6 py-4 border-b border-slate-100/80 bg-white/80 backdrop-blur-md gap-2 lg:gap-0 sticky top-0 z-50">
       {/* Top Row (Always visible, responsive) */}
-      <div className="flex items-center justify-between w-full md:w-auto gap-4">
+      <div className="flex items-center justify-between w-full lg:w-auto gap-4">
         <div className="flex items-center gap-3">
           <Link href="/dashboard/overview" className="flex items-center gap-2">
             {/* Loop Icon (Double Circle) */}
@@ -49,23 +49,14 @@ export default function TopNav() {
             <span className="font-bold text-slate-800 tracking-tight text-lg">LoopAI</span>
           </Link>
 
-          {/* Overlapping Platform Badges (Desktop) */}
-          <div className="hidden lg:flex items-center -space-x-2.5 ml-2">
-            <div className="w-7 h-7 rounded-full bg-[#14a800] border-2 border-white flex items-center justify-center text-[10px] font-bold text-white shadow-sm" title="Upwork Connected">
-              Up
-            </div>
-            <div className="w-7 h-7 rounded-full bg-[#0087e0] border-2 border-white flex items-center justify-center text-white shadow-sm" title="Freelancer Connected">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13H5.5L12 6.5z" />
-              </svg>
-            </div>
-            <div className="w-7 h-7 rounded-full bg-[#1dbf73] border-2 border-white flex items-center justify-center text-[10px] font-bold text-white shadow-sm" title="Fiverr Connected">
-              fi
-            </div>
-            <button className="w-7 h-7 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 border-dashed flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors shadow-sm cursor-pointer">
-              <Plus className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          {/* AI Copilot shortcut button */}
+          <Link
+            href="/dashboard/ai"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100/80 border border-purple-200 text-purple-700 rounded-xl text-xs font-bold shadow-3xs transition-colors ml-3 cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-650 animate-pulse" />
+            <span>AI Copilot</span>
+          </Link>
 
           {/* Clerk Org Switcher */}
           <div className="border-l border-slate-200 pl-3 py-0.5 max-w-[120px] sm:max-w-none overflow-hidden">
@@ -84,7 +75,7 @@ export default function TopNav() {
         </div>
 
         {/* Mobile controls (UserButton + Hamburger) */}
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <UserButton
             appearance={{
               elements: {
@@ -103,7 +94,7 @@ export default function TopNav() {
       </div>
 
       {/* Center: Navigation Links (Desktop) */}
-      <div className="hidden md:flex items-center gap-1 sm:gap-2">
+      <div className="hidden lg:flex items-center gap-1 sm:gap-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -130,7 +121,7 @@ export default function TopNav() {
       </div>
 
       {/* Right: Clerk UserButton (Desktop) */}
-      <div className="hidden md:flex items-center gap-3">
+      <div className="hidden lg:flex items-center gap-3">
         <UserButton
           appearance={{
             elements: {
@@ -142,10 +133,10 @@ export default function TopNav() {
 
       {/* Mobile Drawer (Visible when expanded on small screens) */}
       {isOpen && (
-        <div className="w-full md:hidden flex flex-col gap-4 pt-4 border-t border-slate-100 mt-2 animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="w-full lg:hidden flex flex-col gap-4 pt-4 border-t border-slate-100 mt-2 animate-in fade-in slide-in-from-top-4 duration-200">
           {/* Navigation Links list */}
           <div className="flex flex-col gap-1">
-            {navItems.map((item) => {
+            {[...navItems, { label: "AI Copilot", href: "/dashboard/ai" }].map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -164,21 +155,12 @@ export default function TopNav() {
             })}
           </div>
 
-          {/* Platform badges (included in mobile menu for utility) */}
+          {/* AI Copilot shortcut badge (mobile menu) */}
           <div className="flex items-center gap-2 px-4 py-2 border-t border-slate-100/50">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-2">Connected:</span>
-            <div className="flex items-center -space-x-2">
-              <div className="w-7 h-7 rounded-full bg-[#14a800] border-2 border-white flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
-                Up
-              </div>
-              <div className="w-7 h-7 rounded-full bg-[#0087e0] border-2 border-white flex items-center justify-center text-white shadow-sm">
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13H5.5L12 6.5z" />
-                </svg>
-              </div>
-              <div className="w-7 h-7 rounded-full bg-[#1dbf73] border-2 border-white flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
-                fi
-              </div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-2">Copilot:</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 border border-purple-100 text-purple-700 rounded-lg text-[9px] font-extrabold select-none">
+              <Sparkles className="w-2.5 h-2.5 text-purple-500 animate-pulse" />
+              <span>ACTIVE SYNC</span>
             </div>
           </div>
         </div>

@@ -5,7 +5,7 @@ interface ChatMessage {
   content: string;
 }
 
-export async function callLLM(messages: ChatMessage[]): Promise<string> {
+export async function callLLM(messages: ChatMessage[], workspaceContext?: string): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY;
 
   // Summarize current CRM data for the AI system prompt context
@@ -22,27 +22,49 @@ export async function callLLM(messages: ChatMessage[]): Promise<string> {
   const signedCount = mockClients.filter((c) => c.agreementStatus === "signed").length;
   const negotiatingCount = mockClients.filter((c) => c.agreementStatus === "negotiating").length;
 
-  const systemPrompt = `You are LoopAI Assistant, an intelligence bot built into the LoopAI CRM dashboard.
+  let systemPrompt = `You are LoopAI Assistant, an intelligence bot built into the LoopAI CRM dashboard.
 Your goal is to help freelancers and design agencies manage their client relationships, optimize their profiles, and grow their revenues.
-
-Here is the current client data in the database:
-${clientContext}
-
-Metrics:
-- Total active clients: ${mockClients.length}
-- Platform breakdown: ${upworkCount} Upwork, ${freelancerCount} Freelancer, ${fiverrCount} Fiverr
-- Agreements: ${signedCount} Signed Contracts, ${negotiatingCount} Ongoing Negotiations
 
 Guidelines:
 1. Provide highly actionable, concise, and professional responses.
-2. Directly reference specific clients or platforms in your data when relevant.
+2. Directly reference specific clients, budgets, or messages in your data when relevant.
 3. Keep answers under 3-4 paragraphs maximum, with bullet points for readability.
+4. If a question cannot be answered from the provided workspace data, politely explain that you do not have that information in the current workspace, rather than inventing fake facts.
 `;
+
+  if (workspaceContext) {
+    systemPrompt += `\nHere is the relevant live database context for this query:\n${workspaceContext}\n`;
+  } else {
+    systemPrompt += `\nHere is the current client data context:\n${clientContext}\n
+Metrics:
+- Total active clients: ${mockClients.length}
+- Platform breakdown: ${upworkCount} Upwork, ${freelancerCount} Freelancer, ${fiverrCount} Fiverr
+- Agreements: ${signedCount} Signed Contracts, ${negotiatingCount} Ongoing Negotiations\n`;
+  }
 
   // Fallback response generator if API key is not present
   if (!apiKey || apiKey === "your_openrouter_api_key_here") {
     console.warn("[LoopAI] OPENROUTER_API_KEY is not configured. Falling back to Mock Intelligence.");
     
+    if (workspaceContext) {
+      // If we have workspace context, format it beautifully for mock mode to prevent weird alignment
+      return `### 📊 Workspace Insights (Mock Mode)
+
+I am currently running in **Mock Mode** because the \`OPENROUTER_API_KEY\` is not configured in your \`.env.local\`. However, I have parsed your question against the live workspace context:
+
+---
+
+${workspaceContext
+  .trim()
+  .split("\n")
+  .map((line) => line.startsWith("-") || line.startsWith("*") || line.startsWith("#") ? line : `> ${line}`)
+  .join("\n")}
+
+---
+
+*To enable real AI reasoning and conversational replies, please configure a valid \`OPENROUTER_API_KEY\` in your \`.env.local\` file.*`;
+    }
+
     const lastUserMessage = messages[messages.length - 1]?.content.toLowerCase() || "";
 
     // Simulated responses based on keywords
