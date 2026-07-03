@@ -5,6 +5,7 @@ export const clients = pgTable("clients", {
   name: text("name").notNull(),
   role: text("role").notNull(),
   company: text("company").notNull(),
+  email: text("email").notNull(),
   platform: text("platform").$type<"upwork" | "fiverr" | "freelancer">().notNull(),
   sector: text("sector").$type<"UX/UI Design" | "Branding" | "Media">().notNull(),
   budget: integer("budget").notNull(),
@@ -38,7 +39,18 @@ export const messages = pgTable("messages", {
     .references(() => clients.id, { onDelete: "cascade" }),
   sender: text("sender").$type<"client" | "me">().notNull(),
   text: text("text").notNull(),
+  subject: text("subject"),
+  gmailMessageId: text("gmail_message_id").unique(),
   timestamp: text("timestamp").notNull(), // ISO Date String
   read: boolean("read").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userOAuthTokens = pgTable("user_oauth_tokens", {
+  userId: text("user_id").primaryKey(), // Clerk User ID
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token").notNull(), // Encrypted
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

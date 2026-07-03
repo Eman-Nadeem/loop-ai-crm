@@ -6,12 +6,16 @@ export interface Message {
   text: string;
   timestamp: string; // ISO String
   read: boolean;
+  subject?: string;
+  gmailMessageId?: string;
 }
 
 export interface Thread {
   clientId: string;
   client?: Client; // Resolved client reference
   messages: Message[];
+  isUnmatched?: boolean;
+  unmatchedEmail?: string;
 }
 
 export const mockThreads: Thread[] = [
@@ -153,23 +157,34 @@ export const mockThreads: Thread[] = [
       {
         id: "m6_1",
         sender: "client",
-        text: "Hi! We need a quick revision on the logo font. Can we try a sans-serif look?",
-        timestamp: "2026-06-30T22:00:00Z",
+        subject: "Identity system, final files",
+        text: "Hi, attaching the final logo files and brand guidelines PDF. Let me know if the file formats work for your printer, and happy to adjust anything before we lock this in.",
+        timestamp: "2026-06-29T14:15:00Z",
         read: true
       },
       {
         id: "m6_2",
         sender: "me",
-        text: "Sure, David. I will export a few options with a sans-serif typeface shortly.",
-        timestamp: "2026-07-01T09:30:00Z",
+        subject: "Re: Identity system, final files",
+        text: "Thanks David, received everything. One question on the secondary palette—should it only be used for digital touchpoints or is it print-approved too?",
+        timestamp: "2026-06-29T15:40:00Z",
         read: true
       },
       {
         id: "m6_3",
         sender: "client",
-        text: "Excellent. Thanks for the quick response!",
-        timestamp: "2026-07-01T09:45:00Z",
+        subject: "Re: Identity system, final files",
+        text: "Good question, the secondary palette should only be used for digital assets for now. Print applications should stick to the primary palette.",
+        timestamp: "2026-06-30T09:02:00Z",
         read: true
+      },
+      {
+        id: "m6_4",
+        sender: "client",
+        subject: "No subject",
+        text: "hi",
+        timestamp: "2026-07-02T19:32:00Z",
+        read: false
       }
     ]
   },
@@ -196,6 +211,51 @@ export const mockThreads: Thread[] = [
         text: "Signed! Looking forward to kicking this off.",
         timestamp: "2026-06-29T14:00:00Z",
         read: true
+      }
+    ]
+  },
+  {
+    clientId: "unmatched-1",
+    isUnmatched: true,
+    unmatchedEmail: "unknown@vendor.com",
+    messages: [
+      {
+        id: "mu1_1",
+        sender: "client",
+        text: "Hi, I saw your profile and wanted to inquire if you have availability for a new branding audit next week. Let me know your rates.",
+        timestamp: "2026-07-02T10:00:00Z",
+        read: false,
+        subject: "New Branding Audit RFP"
+      }
+    ]
+  },
+  {
+    clientId: "unmatched-2",
+    isUnmatched: true,
+    unmatchedEmail: "service@billing-portal.com",
+    messages: [
+      {
+        id: "mu2_1",
+        sender: "client",
+        text: "Your monthly invoice for cloud services has been generated. Amount due: $84.50. Payment will be processed automatically.",
+        timestamp: "2026-07-01T08:30:00Z",
+        read: true,
+        subject: "Monthly Statement - June 2026"
+      }
+    ]
+  },
+  {
+    clientId: "unmatched-3",
+    isUnmatched: true,
+    unmatchedEmail: "info@techinsights-newsletter.com",
+    messages: [
+      {
+        id: "mu3_1",
+        sender: "client",
+        text: "This week's edition covers the emergence of AI workflows in B2B SaaS platforms. Read about the new agent architectures.",
+        timestamp: "2026-06-30T12:00:00Z",
+        read: true,
+        subject: "TechInsights Weekly Digest"
       }
     ]
   }

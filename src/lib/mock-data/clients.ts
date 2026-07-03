@@ -3,6 +3,7 @@ export interface Client {
   name: string;
   role: string;
   company: string;
+  email: string;
   platform: 'upwork' | 'fiverr' | 'freelancer';
   sector: 'UX/UI Design' | 'Branding' | 'Media';
   budget: number;
@@ -18,6 +19,7 @@ export const mockClients: Client[] = [
     name: "Sophie Turner",
     role: "CEO",
     company: "UpperCode",
+    email: "sophie.turner@example.com",
     platform: "upwork",
     sector: "UX/UI Design",
     budget: 150,
@@ -31,6 +33,7 @@ export const mockClients: Client[] = [
     name: "Chloe Anderson",
     role: "CFO",
     company: "FinServe",
+    email: "chloe.anderson@example.com",
     platform: "freelancer",
     sector: "Branding",
     budget: 120,
@@ -44,6 +47,7 @@ export const mockClients: Client[] = [
     name: "Isabella Hart",
     role: "CTO",
     company: "TechWave",
+    email: "isabella.hart@example.com",
     platform: "upwork",
     sector: "Media",
     budget: 75,
@@ -57,6 +61,7 @@ export const mockClients: Client[] = [
     name: "Samuel Thompson",
     role: "CMO",
     company: "BrandLift",
+    email: "samuel.thompson@example.com",
     platform: "freelancer",
     sector: "Branding",
     budget: 200,
@@ -70,6 +75,7 @@ export const mockClients: Client[] = [
     name: "Michael Anderson",
     role: "COO",
     company: "OpsMaster",
+    email: "michael.anderson@example.com",
     platform: "upwork",
     sector: "Media",
     budget: 90,
@@ -83,6 +89,7 @@ export const mockClients: Client[] = [
     name: "David Johnson",
     role: "CIO",
     company: "DataSphere",
+    email: "david.johnson@example.com",
     platform: "fiverr",
     sector: "Branding",
     budget: 250,
@@ -96,6 +103,7 @@ export const mockClients: Client[] = [
     name: "Madeline Brooks",
     role: "CSO",
     company: "SecureNet",
+    email: "madeline.brooks@example.com",
     platform: "freelancer",
     sector: "Media",
     budget: 180,
@@ -109,6 +117,7 @@ export const mockClients: Client[] = [
     name: "Christopher Brown",
     role: "CHRO",
     company: "PeopleFirst",
+    email: "christopher.brown@example.com",
     platform: "upwork",
     sector: "UX/UI Design",
     budget: 80,
@@ -122,6 +131,7 @@ export const mockClients: Client[] = [
     name: "Daniel Martinez",
     role: "CDO",
     company: "DigitalNest",
+    email: "daniel.martinez@example.com",
     platform: "upwork",
     sector: "Media",
     budget: 230,
@@ -135,6 +145,7 @@ export const mockClients: Client[] = [
     name: "Victoria Lane",
     role: "CLO",
     company: "LegalWise",
+    email: "victoria.lane@example.com",
     platform: "fiverr",
     sector: "Branding",
     budget: 140,
@@ -148,6 +159,7 @@ export const mockClients: Client[] = [
     name: "Matthew Garcia",
     role: "CVO",
     company: "VisionaryCorp",
+    email: "matthew.garcia@example.com",
     platform: "freelancer",
     sector: "UX/UI Design",
     budget: 100,
@@ -161,6 +173,7 @@ export const mockClients: Client[] = [
     name: "James Wilson",
     role: "CPO",
     company: "ProductForge",
+    email: "james.wilson@example.com",
     platform: "freelancer",
     sector: "Branding",
     budget: 110,

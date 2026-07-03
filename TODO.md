@@ -73,6 +73,20 @@ This file tracks the implemented features and flags out-of-scope work serving as
 - **Widescreen Projects Grid:** Updated the project directory grid view to display 4 project cards per row on larger desktop widths (`xl:grid-cols-4`).
 - **Numeric Fields Cleared Typing Fix:** Fixed input locks on budget numeric fields across both creation forms and edit dialogs on the project and client detail pages, allowing the fields to be cleared and typed freely.
 
+### Chunk 9: Real Gmail Integration for Inbox
+- **Database Schema Updates:** Added `email` to `clients` table, `gmailMessageId` and `subject` to `messages` table, and created the `user_oauth_tokens` database table.
+- **Client Onboarding Email Field:** Added mandatory `email` inputs in Add Client and Edit Client dialog forms.
+- **Google OAuth Consent Flow:** Built `/api/auth/google` and `/api/auth/google/callback` endpoints to securely request the read-only `gmail.readonly` scope, keeping it in Testing mode for personal use.
+- **Secure Token Encryption:** Implemented an AES-256-CBC encryption utility (`src/lib/utils/encryption.ts`) to store Google refresh tokens securely at rest, matching them per-user (Clerk `userId`).
+- **Gmail Sync Engine:** Implemented background token rotation and Gmail API sync engine that decodes Base64Url MIME contents, matches incoming/outgoing emails to clients by email, and caches them in the local database.
+- **Gmail Compose Deep Links:** Replaced local message send action with dynamic Gmail deep link redirection, allowing users to review and send AI-suggested draft replies from their native Gmail compose window in a new tab. Corrected the behavior to always open the deep link compose tab regardless of whether OAuth token connection is active, with fallback local message logging if disconnected.
+- **Full-Width Inbox Sub-paths Layout:** Resolved layout constraints so that visiting individual inbox threads or messages hide the sidebar (AI Assistant) and span the entire window (`lg:col-span-12`, `p-0`), matching the root inbox route layout.
+- **Inbox Sync UI:** Created frosted-glass connection CTA empty state panels and left sidebar toolbar actions (Sync / Disconnect) using Clerk-resolved user contexts.
+- **Dynamic Inbox Routing & Flat List Redesign:** Refactored the Inbox interface into an App Router catch-all dynamic path `/dashboard/inbox/[[...slug]]`:
+  - **Right Panel (Default):** Displays a flat chronological list of that client's emails with received (↙) vs. sent (↗) direction arrows, subject lines, text previews, timestamps, and unread dots.
+  - **Email Viewer Route:** Dynamic subpath `/dashboard/inbox/[clientId]/[emailId]` opens the email detail page with a `< Back` button, full email body, paperclip attachment indicator, and a context-aware AI Draft suggestions composer box (hidden for sent outgoing messages).
+  - **Infinite Render Loop Fix:** Patched a React update depth error by ensuring `markThreadAsRead` is only invoked when unread client messages are actively present.
+
 ---
 
 ## Out of Scope / Upcoming Chunks

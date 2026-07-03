@@ -31,6 +31,12 @@
       "skillPath": "skills/core/clerk-setup/SKILL.md",
       "computedHash": "bbf0711ddcc8d8d0dcd148c0061ab83c7d66225a60a28caba62ef76e4384fa54"
     },
+    "gws-gmail": {
+      "source": "googleworkspace/cli",
+      "sourceType": "github",
+      "skillPath": "skills/gws-gmail/SKILL.md",
+      "computedHash": "31b12bd4bfa3fe1b5132067c597f85f5d3456060658a904a54ed6cb5b32ab6e4"
+    },
     "supabase": {
       "source": "supabase/agent-skills",
       "sourceType": "github",

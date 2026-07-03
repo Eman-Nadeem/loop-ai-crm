@@ -15,7 +15,10 @@ import {
   updateProjectDb,
   deleteProjectDb,
   addMessageDb,
-  markThreadReadDb
+  markThreadReadDb,
+  checkGmailConnectionAction,
+  syncGmailInboxAction,
+  disconnectGmailAction
 } from "@/lib/actions/crm-actions";
 
 export interface Toast {
@@ -50,6 +53,12 @@ interface CRMContextType {
   toasts: Toast[];
   addToast: (message: string, type?: "success" | "error" | "info") => void;
   removeToast: (id: string) => void;
+
+  // Gmail OAuth Integration
+  isGmailConnected: boolean;
+  gmailSyncing: boolean;
+  syncGmail: () => Promise<void>;
+  disconnectGmail: () => Promise<void>;
 }
 
 const CRMContext = createContext<CRMContextType | undefined>(undefined);
@@ -68,6 +77,8 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [isGmailConnected, setIsGmailConnected] = useState(false);
+  const [gmailSyncing, setGmailSyncing] = useState(false);
 
   // Initialize data on mount
   useEffect(() => {
@@ -80,6 +91,10 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
         setProjects(state.projects as Project[]);
         setThreads(state.threads as Thread[]);
         console.log("[CRM Context] Database connected successfully.");
+
+        // Check Gmail connection status
+        const connection = await checkGmailConnectionAction();
+        setIsGmailConnected(connection.connected);
       } catch (error) {
         console.warn(
           "[CRM Context] Database URL not configured or connection failed. Falling back to local session store.",
@@ -373,6 +388,45 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const syncGmail = useCallback(async () => {
+    setGmailSyncing(true);
+    try {
+      const result = await syncGmailInboxAction();
+      if (result.success) {
+        const stats = result as { matchedCount?: number; unmatchedCount?: number };
+        addToast(
+          `Gmail synced successfully! Matched: ${stats.matchedCount || 0}, Unmatched: ${stats.unmatchedCount || 0}`,
+          "success"
+        );
+        // Refresh entire state to populate the synced messages
+        const state = await fetchCRMState();
+        setClients(state.clients);
+        setProjects(state.projects as Project[]);
+        setThreads(state.threads as Thread[]);
+      } else {
+        addToast(result.error || "Failed to sync Gmail messages.", "error");
+      }
+    } catch (e: any) {
+      addToast(e.message || "An unexpected error occurred during sync.", "error");
+    } finally {
+      setGmailSyncing(false);
+    }
+  }, [addToast]);
+
+  const disconnectGmail = useCallback(async () => {
+    try {
+      const result = await disconnectGmailAction();
+      if (result.success) {
+        setIsGmailConnected(false);
+        addToast("Gmail account disconnected successfully.", "success");
+      } else {
+        addToast(result.error || "Failed to disconnect Gmail.", "error");
+      }
+    } catch (e: any) {
+      addToast(e.message || "An unexpected error occurred during disconnect.", "error");
+    }
+  }, [addToast]);
+
   return (
     <CRMContext.Provider
       value={{
@@ -393,12 +447,16 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
         toasts,
         addToast,
         removeToast,
+        isGmailConnected,
+        gmailSyncing,
+        syncGmail,
+        disconnectGmail,
       }}
     >
       {children}
       
       {/* Dynamic Toast Portal */}
-      <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+      <div className="fixed bottom-6 right-6 z-9999 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
         <AnimatePresence>
           {toasts.map((toast) => {
             const colors = {

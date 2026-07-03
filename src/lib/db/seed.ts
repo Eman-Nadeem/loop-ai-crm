@@ -27,6 +27,7 @@ async function main() {
       name: c.name,
       role: c.role,
       company: c.company,
+      email: c.email,
       platform: c.platform,
       sector: c.sector,
       budget: c.budget,
@@ -59,16 +60,19 @@ async function main() {
 
     // 4. Insert messages
     console.log("✉️ Seeding messages...");
-    const messagesToInsert = mockThreads.flatMap((t) =>
-      t.messages.map((m) => ({
-        id: m.id,
-        clientId: t.clientId,
-        sender: m.sender,
-        text: m.text,
-        timestamp: m.timestamp,
-        read: m.read,
-      }))
-    );
+    const messagesToInsert = mockThreads
+      .filter((t) => !t.isUnmatched && !t.clientId.startsWith("unmatched"))
+      .flatMap((t) =>
+        t.messages.map((m) => ({
+          id: m.id,
+          clientId: t.clientId,
+          sender: m.sender,
+          text: m.text,
+          subject: m.subject || null,
+          timestamp: m.timestamp,
+          read: m.read,
+        }))
+      );
     
     if (messagesToInsert.length > 0) {
       await db.insert(messages).values(messagesToInsert);

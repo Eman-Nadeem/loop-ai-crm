@@ -17,7 +17,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const isClientsPage = pathname === "/dashboard/clients";
   const isProjectsPage = pathname === "/dashboard/projects";
-  const isInboxPage = pathname === "/dashboard/inbox";
+  const isInboxPage = pathname.startsWith("/dashboard/inbox");
   const isAnalyticsPage = pathname === "/dashboard/analytics";
 
   const isFullWidthPage = isInboxPage || isAnalyticsPage || isProjectsPage;

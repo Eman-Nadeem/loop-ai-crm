@@ -45,6 +45,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
   // Form State
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     role: "",
     company: "",
     sector: "UX/UI Design" as "UX/UI Design" | "Branding" | "Media",
@@ -59,6 +60,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
     if (client) {
       setFormData({
         name: client.name,
+        email: client.email || "",
         role: client.role,
         company: client.company,
         sector: client.sector,
@@ -77,6 +79,7 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
     
     updateClient(client.id, {
       name: formData.name,
+      email: formData.email,
       role: formData.role,
       company: formData.company,
       sector: formData.sector,
@@ -359,6 +362,19 @@ export default function ClientDetailPage({ params }: ClientDetailPageProps) {
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="e.g. Jane Doe"
+              className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
+            />
+          </div>
+
+          {/* Email Field */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Email Address</label>
+            <input
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+              placeholder="e.g. client@example.com"
               className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
             />
           </div>

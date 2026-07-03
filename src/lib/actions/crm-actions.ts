@@ -1,8 +1,10 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { clients, projects, messages } from "@/lib/db/schema";
+import { clients, projects, messages, userOAuthTokens } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
+import { syncGmailInbox } from "@/lib/gmail/sync";
 
 // 1. Fetch entire CRM State in parallel
 export async function fetchCRMState() {
@@ -52,10 +54,58 @@ export async function fetchCRMState() {
       };
     });
 
+    const unmatchedThreads = [
+      {
+        clientId: "unmatched-1",
+        isUnmatched: true,
+        unmatchedEmail: "unknown@vendor.com",
+        messages: [
+          {
+            id: "mu1_1",
+            sender: "client",
+            text: "Hi, I saw your profile and wanted to inquire if you have availability for a new branding audit next week. Let me know your rates.",
+            timestamp: "2026-07-02T10:00:00Z",
+            read: false,
+            subject: "New Branding Audit RFP"
+          }
+        ]
+      },
+      {
+        clientId: "unmatched-2",
+        isUnmatched: true,
+        unmatchedEmail: "service@billing-portal.com",
+        messages: [
+          {
+            id: "mu2_1",
+            sender: "client",
+            text: "Your monthly invoice for cloud services has been generated. Amount due: $84.50. Payment will be processed automatically.",
+            timestamp: "2026-07-01T08:30:00Z",
+            read: true,
+            subject: "Monthly Statement - June 2026"
+          }
+        ]
+      },
+      {
+        clientId: "unmatched-3",
+        isUnmatched: true,
+        unmatchedEmail: "info@techinsights-newsletter.com",
+        messages: [
+          {
+            id: "mu3_1",
+            sender: "client",
+            text: "This week's edition covers the emergence of AI workflows in B2B SaaS platforms. Read about the new agent architectures.",
+            timestamp: "2026-06-30T12:00:00Z",
+            read: true,
+            subject: "TechInsights Weekly Digest"
+          }
+        ]
+      }
+    ];
+
     return {
       clients: clientsData,
       projects: resolvedProjects,
-      threads: resolvedThreads,
+      threads: [...resolvedThreads, ...unmatchedThreads],
     };
   } catch (error) {
     console.error("Error fetching CRM State:", error);
@@ -147,5 +197,53 @@ export async function markThreadReadDb(clientId: string) {
   } catch (error) {
     console.error("Error marking thread read:", error);
     throw new Error("Failed to update messages read status.");
+  }
+}
+
+// 5. Gmail OAuth Server Actions
+export async function checkGmailConnectionAction() {
+  try {
+    const { userId } = await auth();
+    if (!userId) return { connected: false };
+
+    const [tokens] = await db
+      .select()
+      .from(userOAuthTokens)
+      .where(eq(userOAuthTokens.userId, userId));
+
+    return { connected: !!tokens };
+  } catch (error) {
+    console.error("Error checking Gmail connection:", error);
+    return { connected: false };
+  }
+}
+
+export async function syncGmailInboxAction() {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const stats = await syncGmailInbox(userId);
+    return { success: true, ...stats };
+  } catch (error: any) {
+    console.error("Error in syncGmailInboxAction:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function disconnectGmailAction() {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    await db.delete(userOAuthTokens).where(eq(userOAuthTokens.userId, userId));
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error in disconnectGmailAction:", error);
+    return { success: false, error: error.message };
   }
 }

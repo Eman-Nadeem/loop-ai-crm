@@ -157,9 +157,28 @@ d:\loop-ai-crm/
 4. **Widescreen Projects Grid:** Displays 4 project cards per row on larger desktop viewports (`xl:grid-cols-4`).
 5. **Clearable Budget Numeric Fields:** Corrected React state and input `onChange` handlers on all project/client creation forms and detail edit dialogs, allowing budget inputs to be cleared and typed freely without reset locks.
 
+### Chunk 9
+1. **Gmail OAuth & Sync Integration:** Connected the CRM Inbox to real Gmail API (read-only) for incoming/outgoing client messages.
+2. **Schema & Seed Migrations:** Altered `clients` with `email`, added `gmailMessageId` and `subject` to `messages`, and created `user_oauth_tokens` table. Seeded mock data with distinct client emails.
+3. **Encryption at Rest:** Implemented AES-256-CBC encryption using native Node `crypto` to store user refresh tokens securely in `user_oauth_tokens` table. Scoped per Clerk `userId` for data privacy.
+4. **Redirection Compose Deep Links:** Custom sending flow constructs pre-filled `https://mail.google.com/mail/` compose tab deep links containing the AI-suggested draft, recipient, and subject, letting the user verify and send from their native Gmail tab. Always opens deep links regardless of authentication connection, using local mock data fallback when disconnected.
+5. **Inbox Sync UI:** Created frosted-glass connection CTA empty state panels and left sidebar toolbar actions (Sync / Disconnect) using Clerk-resolved user contexts.
+6. **Full-Width Inbox Sub-paths Layout:** Configured the dashboard layout to resolve inbox sub-paths (individual thread and email views) as `isInboxPage`, spanning the entire viewport (`lg:col-span-12`, `p-0`) and hiding the AI Assistant sidebar.
+7. **Dynamic Route Catch-All & Flat List Redesign:** Refactored dynamic paths using catch-all route `/dashboard/inbox/[[...slug]]`:
+   - **Right Panel (Default List):** Renders a clean list of the selected client's emails (received `↙` vs. sent `↗` arrows, subject line, text preview, timestamp, and unread dots). Clicking an email opens the card in the Viewer.
+   - **Email Viewer state (`[clientId]/[emailId]`):** Standalone email reader detailing sender/receiver metadata, full message body, mock paperclip attachment cards, and a reply box with AI suggestions triggers (hidden for outgoing sent emails).
+   - **Infinite Render Loop Fix:** Added an unread check to `useEffect` trigger before invoking `markThreadAsRead` context state changes, breaking recursive rendering loops.
+
 ---
 
 ## 4. Key Conventions & Rules for Future Agents
+
+> [!IMPORTANT]
+> **Google OAuth Configuration (Gmail read-only)**
+> - **OAuth Console Settings:** The Google Cloud Project OAuth consent screen MUST remain in **Testing mode** (not Published) with developer accounts registered as test users. This bypasses CASA verification / security audits for personal use/demos.
+> - **Requested Scope:** Request ONLY `https://www.googleapis.com/auth/gmail.readonly` to pull and match inbox/outbox history. Never request write permissions (`gmail.send` or `gmail.modify`) as compose deep links are used to draft.
+> - **Redirect URI:** Match the registered console URI exactly: `http://localhost:3000/api/auth/google/callback`.
+> - **Refresh Tokens:** Refresh tokens must be encrypted with `OAUTH_ENCRYPTION_KEY` (AES-256-CBC) before writing to `user_oauth_tokens`. Never log plain tokens or email bodies to server outputs.
 
 > [!WARNING]
 > **Next.js 16 Deprecations & Conventions**

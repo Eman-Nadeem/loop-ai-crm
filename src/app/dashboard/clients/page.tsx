@@ -19,6 +19,7 @@ export default function ClientsPage() {
   // Form State
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     role: "",
     company: "",
     sector: "UX/UI Design" as "UX/UI Design" | "Branding" | "Media",
@@ -44,6 +45,7 @@ export default function ClientsPage() {
     // Reset form to defaults
     setFormData({
       name: "",
+      email: "",
       role: "",
       company: "",
       sector: "UX/UI Design",
@@ -59,6 +61,7 @@ export default function ClientsPage() {
     e.preventDefault();
     addClient({
       name: formData.name,
+      email: formData.email,
       role: formData.role,
       company: formData.company,
       sector: formData.sector,
@@ -171,6 +174,19 @@ export default function ClientsPage() {
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="e.g. Sarah Jenkins"
+              className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
+            />
+          </div>
+
+          {/* Email Field */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Email Address</label>
+            <input
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+              placeholder="e.g. sarah@flowcore.com"
               className="w-full text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-purple-200 focus:bg-white transition-all text-slate-800 font-medium"
             />
           </div>
